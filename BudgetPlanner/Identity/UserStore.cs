@@ -24,7 +24,7 @@ namespace BudgetPlanner.Identity
 
             try
             {
-                await this.userRepository.CreateAsync(user);
+                await this.userRepository.CreateAsync(user).ConfigureAwait(false);
             }
             catch (RepositoryException ex)
             {

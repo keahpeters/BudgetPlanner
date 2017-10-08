@@ -41,7 +41,7 @@ namespace BudgetPlanner.Repositories
                         user.EmailConfirmed,
                         user.PasswordHash,
                         user.UserName
-                    });
+                    }).ConfigureAwait(false);
 
                     if (rows == 0)
                         throw new RepositoryException("Failed to add user");
@@ -61,8 +61,7 @@ namespace BudgetPlanner.Repositories
 
             using (DbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<ApplicationUser> user =
-                    await dbConnection.QueryAsync<ApplicationUser>(sql, new {UserName = userName});
+                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new {UserName = userName}).ConfigureAwait(false);
 
                 return user.FirstOrDefault();
             }
