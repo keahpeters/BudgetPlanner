@@ -64,7 +64,7 @@ namespace BudgetPlanner.Controllers
                 SignInResult loginResult = await this.signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
 
                 if (loginResult.Succeeded)
-                    this.RedirectToAction("Index", "Home");
+                    return this.RedirectToAction("Index", "Home");
             }
 
             this.ModelState.AddModelError("", "Could not login");

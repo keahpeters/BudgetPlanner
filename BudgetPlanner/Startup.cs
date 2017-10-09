@@ -47,7 +47,8 @@ namespace BudgetPlanner
 
             app.UseFileServer();
             app.UseNodeModules(env.ContentRootPath);
-            app.UseMvc(ConfigureRoutes);
+            app.UseAuthentication();
+            app.UseMvc(this.ConfigureRoutes);
             app.Run(ctx => ctx.Response.WriteAsync("Not found"));
         }
 
