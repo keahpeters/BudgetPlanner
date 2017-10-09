@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using BudgetPlanner.Models;
 using BudgetPlanner.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -9,13 +10,13 @@ namespace BudgetPlanner.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
-            this.userManager = userManager;
-            this.signInManager = signInManager;
+            this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            this.signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         }
 
         [HttpGet]
