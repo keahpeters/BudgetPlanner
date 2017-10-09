@@ -8,7 +8,7 @@ using BudgetPlanner.Repositories;
 
 namespace BudgetPlanner.Identity
 {
-    public class UserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>
+    public class UserStore : IUserPasswordStore<ApplicationUser>
     {
         private readonly IUserRepository userRepository;
 
@@ -26,9 +26,8 @@ namespace BudgetPlanner.Identity
             {
                 await this.userRepository.CreateAsync(user).ConfigureAwait(false);
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException)
             {
-                // todo: log exception
                 return IdentityResult.Failed(new IdentityError { Description = $"Could not insert user {user.Email}." });
             }
 
