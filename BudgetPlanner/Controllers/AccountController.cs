@@ -43,6 +43,7 @@ namespace BudgetPlanner.Controllers
                     await this.signInManager.SignInAsync(user, false);
                     return this.RedirectToAction("Index", "Home");
                 }
+
                 foreach (IdentityError error in createResult.Errors)
                     this.ModelState.AddModelError(string.Empty, error.Description);
             }
