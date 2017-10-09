@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BudgetPlanner.Identity;
 using BudgetPlanner.Models;
 using BudgetPlanner.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -10,10 +11,10 @@ namespace BudgetPlanner.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IUserManagerWrapper<ApplicationUser> userManager;
+        private readonly ISignInManagerWrapper<ApplicationUser> signInManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(IUserManagerWrapper<ApplicationUser> userManager, ISignInManagerWrapper<ApplicationUser> signInManager)
         {
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using BudgetPlanner.Controllers;
+using BudgetPlanner.Identity;
 using BudgetPlanner.Models;
 using BudgetPlanner.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -15,36 +14,28 @@ namespace BudgetPlanner.Tests.Controllers
     [TestFixture]
     public class AccountControllerTests
     {
-        private Mock<IUserPasswordStore<ApplicationUser>> userStore;
-        private Mock<IHttpContextAccessor> contextAccessor;
-        private Mock<IUserClaimsPrincipalFactory<ApplicationUser>> claimsFactory;
-        private Mock<IPasswordHasher<ApplicationUser>> passwordHasher;
-        private UserManager<ApplicationUser> userManager;
-        private SignInManager<ApplicationUser> signInManager;
+        private Mock<IUserManagerWrapper<ApplicationUser>> userManager;
+        private Mock<ISignInManagerWrapper<ApplicationUser>> signInManager;
         private AccountController accountController;
 
         [SetUp]
         public void SetUp()
         {
-            this.userStore = new Mock<IUserPasswordStore<ApplicationUser>>();
-            this.contextAccessor = new Mock<IHttpContextAccessor>();
-            this.claimsFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-            this.passwordHasher = new Mock<IPasswordHasher<ApplicationUser>>();
-            this.userManager = new UserManager<ApplicationUser>(this.userStore.Object, null, this.passwordHasher.Object, null, null, null, null, null, null);
-            this.signInManager = new SignInManager<ApplicationUser>(this.userManager, this.contextAccessor.Object, this.claimsFactory.Object, null, null, null);
-            this.accountController = new AccountController(this.userManager, this.signInManager);
+            this.userManager = new Mock<IUserManagerWrapper<ApplicationUser>>();
+            this.signInManager = new Mock<ISignInManagerWrapper<ApplicationUser>>();
+            this.accountController = new AccountController(this.userManager.Object, this.signInManager.Object);
         }
 
         [Test]
         public void WhenUserManagerIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.accountController = new AccountController(null, this.signInManager));
+            Assert.Throws<ArgumentNullException>(() => this.accountController = new AccountController(null, this.signInManager.Object));
         }
 
         [Test]
         public void WhenSignInManagerIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.accountController = new AccountController(this.userManager, null));
+            Assert.Throws<ArgumentNullException>(() => this.accountController = new AccountController(this.userManager.Object, null));
         }
 
         [Test]
@@ -98,7 +89,8 @@ namespace BudgetPlanner.Tests.Controllers
                 Email = "test@test.com"
             };
 
-            this.userStore.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>())).ReturnsAsync(IdentityResult.Failed());
+            this.userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError {Description = "Test error"}));
 
             IActionResult result = await this.accountController.Register(model);
 
@@ -116,13 +108,73 @@ namespace BudgetPlanner.Tests.Controllers
                 Email = "test@test.com"
             };
 
-            this.userStore.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>())).ReturnsAsync(IdentityResult.Failed());
+            this.userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError {Description = "Test error"}));
 
             IActionResult result = await this.accountController.Register(model);
 
             Assume.That(result, Is.TypeOf(typeof(ViewResult)));
 
             Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenRegisterPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            var model = new RegisterUserViewModel
+            {
+                Username = "Keah",
+                Password = "Password1!",
+                ConfirmPassword = "Password1!",
+                Email = "test@test.com"
+            };
+
+            this.userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+
+            IActionResult result = await this.accountController.Register(model);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenRegisterPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            var model = new RegisterUserViewModel
+            {
+                Username = "Keah",
+                Password = "Password1!",
+                ConfirmPassword = "Password1!",
+                Email = "test@test.com"
+            };
+
+            this.userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+
+            IActionResult result = await this.accountController.Register(model);
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.EqualTo("Home"));
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenRegisterPostMethodIsCalledAndAccountIsCreatedThenSignIn()
+        {
+            var model = new RegisterUserViewModel
+            {
+                Username = "Keah",
+                Password = "Password1!",
+                ConfirmPassword = "Password1!",
+                Email = "test@test.com"
+            };
+
+            this.userManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success);
+
+            IActionResult result = await this.accountController.Register(model);
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            this.signInManager.Verify(s => s.SignInAsync(It.IsAny<ApplicationUser>(), false, It.IsAny<string>()), Times.Once);
         }
     }
 }

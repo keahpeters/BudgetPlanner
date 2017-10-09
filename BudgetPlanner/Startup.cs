@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BudgetPlanner
 {
@@ -15,11 +15,11 @@ namespace BudgetPlanner
     {
         public Startup(IHostingEnvironment env)
         {
-            var builder = new ConfigurationBuilder()
+            IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json");
 
-            Configuration = builder.Build();
+            this.Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; set; }
@@ -29,21 +29,21 @@ namespace BudgetPlanner
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSingleton(Configuration);
-            services.AddSingleton<IDbConnectionFactory>(s => new SqlConnectionFactory(Configuration.GetConnectionString("BudgetPlanner")));
+            services.AddSingleton(this.Configuration);
+            services.AddSingleton<IDbConnectionFactory>(s => new SqlConnectionFactory(this.Configuration.GetConnectionString("BudgetPlanner")));
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddIdentity<ApplicationUser, ApplicationRole>().AddDefaultTokenProviders();
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
             services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
+            services.AddTransient<IUserManagerWrapper<ApplicationUser>, UserManagerWrapper<ApplicationUser>>();
+            services.AddTransient<ISignInManagerWrapper<ApplicationUser>, SignInManagerWrapper<ApplicationUser>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseFileServer();
             app.UseNodeModules(env.ContentRootPath);
