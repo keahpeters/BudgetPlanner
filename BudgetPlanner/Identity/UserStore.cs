@@ -1,10 +1,10 @@
-﻿using BudgetPlanner.Models;
-using Microsoft.AspNetCore.Identity;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using BudgetPlanner.Infrastructure;
+using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
+using Microsoft.AspNetCore.Identity;
 
 namespace BudgetPlanner.Identity
 {
@@ -28,7 +28,7 @@ namespace BudgetPlanner.Identity
             }
             catch (RepositoryException)
             {
-                return IdentityResult.Failed(new IdentityError { Description = $"Could not insert user {user.Email}." });
+                return IdentityResult.Failed(new IdentityError {Description = $"Could not insert user {user.Email}."});
             }
 
             return IdentityResult.Success;

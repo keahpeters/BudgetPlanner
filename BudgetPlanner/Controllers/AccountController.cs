@@ -68,9 +68,10 @@ namespace BudgetPlanner.Controllers
 
                 if (loginResult.Succeeded)
                     return this.RedirectToAction("Index", "Home");
+
+                this.ModelState.AddModelError("", "Could not login");
             }
 
-            this.ModelState.AddModelError("", "Could not login");
             return this.View();
         }
 
