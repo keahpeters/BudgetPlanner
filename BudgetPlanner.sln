@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetPlanner", "BudgetPlan
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A8A3B64F-8B5D-4B30-B897-D214BB0DB669}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetPlanner.Tests", "BudgetPlanner.Tests\BudgetPlanner.Tests.csproj", "{245351D8-47EF-4309-8885-E21FBEE04C5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BudgetPlanner.Tests", "BudgetPlanner.Tests\BudgetPlanner.Tests.csproj", "{245351D8-47EF-4309-8885-E21FBEE04C5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetPlanner.IntegrationTests", "BudgetPlanner.IntegrationTests\BudgetPlanner.IntegrationTests.csproj", "{760A5F74-499B-4FDB-9D11-BC05D120E7CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +25,17 @@ Global
 		{245351D8-47EF-4309-8885-E21FBEE04C5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{245351D8-47EF-4309-8885-E21FBEE04C5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{245351D8-47EF-4309-8885-E21FBEE04C5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{760A5F74-499B-4FDB-9D11-BC05D120E7CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{760A5F74-499B-4FDB-9D11-BC05D120E7CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{760A5F74-499B-4FDB-9D11-BC05D120E7CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{760A5F74-499B-4FDB-9D11-BC05D120E7CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{245351D8-47EF-4309-8885-E21FBEE04C5F} = {A8A3B64F-8B5D-4B30-B897-D214BB0DB669}
+		{760A5F74-499B-4FDB-9D11-BC05D120E7CA} = {A8A3B64F-8B5D-4B30-B897-D214BB0DB669}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {36E0A75C-CC6C-4815-80A5-90AF121BE080}

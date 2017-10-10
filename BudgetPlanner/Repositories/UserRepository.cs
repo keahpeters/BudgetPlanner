@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Data.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,29 +23,25 @@ namespace BudgetPlanner.Repositories
 
         public UserRepository(IDbConnectionFactory dbConnectionFactory)
         {
-            this.dbConnectionFactory = dbConnectionFactory;
+            this.dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
         }
 
         public async Task CreateAsync(ApplicationUser user)
         {
-            const string sql = @"INSERT INTO dbo.ApplicationUser (Id, Email, EmailConfirmed, PasswordHash, UserName)
-                           VALUES (@Id, @Email, @EmailConfirmed, @PasswordHash, @UserName)";
+            const string sql = @"INSERT INTO ApplicationUser (Id, Email, PasswordHash, UserName)
+                           VALUES (@Id, @Email, @PasswordHash, @UserName)";
 
-            using (DbConnection dbConnection = this.dbConnectionFactory.Create())
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
                 try
                 {
-                    int rows = await dbConnection.ExecuteAsync(sql, new
+                    await dbConnection.ExecuteAsync(sql, new
                     {
                         user.Id,
                         user.Email,
-                        user.EmailConfirmed,
                         user.PasswordHash,
                         user.UserName
                     }).ConfigureAwait(false);
-
-                    if (rows == 0)
-                        throw new RepositoryException("Failed to add user");
                 }
                 catch (SqlException ex)
                 {
@@ -59,9 +56,9 @@ namespace BudgetPlanner.Repositories
                             FROM ApplicationUser
                             WHERE UserName = @UserName";
 
-            using (DbConnection dbConnection = this.dbConnectionFactory.Create())
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new {UserName = userName}).ConfigureAwait(false);
+                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new { UserName = userName }).ConfigureAwait(false);
 
                 return user.FirstOrDefault();
             }

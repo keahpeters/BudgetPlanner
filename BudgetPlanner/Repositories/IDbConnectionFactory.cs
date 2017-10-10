@@ -1,9 +1,9 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 
 namespace BudgetPlanner.Repositories
 {
     public interface IDbConnectionFactory
     {
-        DbConnection Create();
+        IDbConnection Create();
     }
 }

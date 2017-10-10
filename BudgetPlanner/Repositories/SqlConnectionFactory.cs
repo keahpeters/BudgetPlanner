@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 using System.Data.SqlClient;
 
 namespace BudgetPlanner.Repositories
@@ -12,7 +12,7 @@ namespace BudgetPlanner.Repositories
             this.connectionString = connectionString;
         }
 
-        public DbConnection Create()
+        public IDbConnection Create()
         {
             return new SqlConnection(this.connectionString);
         }
