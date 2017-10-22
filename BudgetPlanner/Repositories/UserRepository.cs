@@ -63,5 +63,17 @@ namespace BudgetPlanner.Repositories
                 return user.FirstOrDefault();
             }
         }
+
+        public async Task<decimal> GetBalance(string userName)
+        {
+            const string sql = @"SELECT balance FROM ApplicationUser Where UserName = @UserName";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                IEnumerable<decimal> balance = await dbConnection.QueryAsync<decimal>(sql, new { UserName = userName }).ConfigureAwait(false);
+
+                return balance.FirstOrDefault();
+            }
+        }
     }
 }

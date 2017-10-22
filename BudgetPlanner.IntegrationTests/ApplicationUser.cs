@@ -20,5 +20,8 @@ namespace BudgetPlanner.IntegrationTests
         [Index(Unique = true)]
         [Required]
         public string UserName { get; set; }
+
+        [Default(typeof(decimal), "0.00")]
+        public decimal Balance { get; set; }
     }
 }

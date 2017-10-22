@@ -100,5 +100,26 @@ namespace BudgetPlanner.IntegrationTests
                 Assert.That(user.Email, Is.EqualTo("test@test.com"));
             });
         }
+
+        [Test]
+        public async Task WhenGetBalanceIsCalledThenBalanceIsReturned()
+        {
+            var usersToInsert = new List<ApplicationUser>
+            {
+                new ApplicationUser
+                {
+                    UserName = "Keah",
+                    PasswordHash = "Test",
+                    Email = "test@test.com",
+                    Balance = 23.15M
+                }
+            };
+
+            this.databaseHelper.Insert(usersToInsert);
+
+            decimal balance = await this.userRepository.GetBalance("Keah");
+
+            Assert.That(balance, Is.EqualTo(23.15M));
+        }
     }
 }
