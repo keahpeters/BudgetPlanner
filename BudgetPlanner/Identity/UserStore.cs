@@ -46,12 +46,12 @@ namespace BudgetPlanner.Identity
 
         public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return this.userRepository.FindByIdAsync(userId);
         }
 
         public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            return this.userRepository.FindByName(normalizedUserName);
+            return this.userRepository.FindByNameAsync(normalizedUserName);
         }
 
         public Task<string> GetNormalizedUserNameAsync(ApplicationUser user, CancellationToken cancellationToken)

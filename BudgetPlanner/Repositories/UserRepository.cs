@@ -14,7 +14,11 @@ namespace BudgetPlanner.Repositories
     {
         Task CreateAsync(ApplicationUser user);
 
-        Task<ApplicationUser> FindByName(string userName);
+        Task<ApplicationUser> FindByNameAsync(string userName);
+
+        Task<ApplicationUser> FindByIdAsync(string userId);
+
+        Task<decimal> GetBalanceAsync(string userName);
     }
 
     public class UserRepository : IUserRepository
@@ -50,27 +54,41 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task<ApplicationUser> FindByName(string userName)
+        public async Task<ApplicationUser> FindByNameAsync(string userName)
         {
             const string sql = @"SELECT Id, Email, PasswordHash, UserName
                             FROM ApplicationUser
-                            WHERE UserName = @UserName";
+                            WHERE UserName = @userName";
 
             using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new { UserName = userName }).ConfigureAwait(false);
+                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new { userName }).ConfigureAwait(false);
 
                 return user.FirstOrDefault();
             }
         }
 
-        public async Task<decimal> GetBalance(string userName)
+        public async Task<ApplicationUser> FindByIdAsync(string userId)
         {
-            const string sql = @"SELECT balance FROM ApplicationUser Where UserName = @UserName";
+            const string sql = @"SELECT Id, Email, PasswordHash, UserName
+                            FROM ApplicationUser
+                            WHERE Id = @userId";
 
             using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<decimal> balance = await dbConnection.QueryAsync<decimal>(sql, new { UserName = userName }).ConfigureAwait(false);
+                IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new { userId }).ConfigureAwait(false);
+
+                return user.FirstOrDefault();
+            }
+        }
+
+        public async Task<decimal> GetBalanceAsync(string userName)
+        {
+            const string sql = @"SELECT balance FROM ApplicationUser Where UserName = @userName";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                IEnumerable<decimal> balance = await dbConnection.QueryAsync<decimal>(sql, new { userName }).ConfigureAwait(false);
 
                 return balance.FirstOrDefault();
             }

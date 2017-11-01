@@ -55,15 +55,19 @@ namespace BudgetPlanner.Tests.Identity
         }
 
         [Test]
-        public void WhenFindByIdAsyncIsCalledThenThrowNotImplementedException()
+        public async Task WhenFindByIdAsyncIsCalledThenUserIsReturned()
         {
-            Assert.Throws<NotImplementedException>(() => this.userStore.FindByIdAsync(Guid.NewGuid().ToString(), new CancellationToken()));
+            this.userRepository.Setup(u => u.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "Test" });
+
+            ApplicationUser result = await this.userStore.FindByIdAsync("Test", new CancellationToken());
+
+            Assert.That(result.UserName, Is.EqualTo("Test"));
         }
 
         [Test]
         public async Task WhenFindByNameAsyncIsCalledThenUserIsReturned()
         {
-            this.userRepository.Setup(u => u.FindByName(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "Test" });
+            this.userRepository.Setup(u => u.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "Test" });
 
             ApplicationUser result = await this.userStore.FindByNameAsync("Test", new CancellationToken());
 

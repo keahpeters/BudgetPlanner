@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BudgetPlanner.Repositories;
@@ -71,7 +72,7 @@ namespace BudgetPlanner.IntegrationTests
         [Test]
         public async Task WhenFindByNameIsCalledAndUserDoesNotExistsThenNullIsReturned()
         {
-            Models.ApplicationUser user = await this.userRepository.FindByName("Keah");
+            Models.ApplicationUser user = await this.userRepository.FindByNameAsync("Keah");
 
             Assert.That(user, Is.Null);
         }
@@ -91,7 +92,7 @@ namespace BudgetPlanner.IntegrationTests
 
             this.databaseHelper.Insert(usersToInsert);
 
-            Models.ApplicationUser user = await this.userRepository.FindByName("Keah");
+            Models.ApplicationUser user = await this.userRepository.FindByNameAsync("Keah");
 
             Assert.Multiple(() =>
             {
@@ -99,6 +100,14 @@ namespace BudgetPlanner.IntegrationTests
                 Assert.That(user.PasswordHash, Is.EqualTo("Test"));
                 Assert.That(user.Email, Is.EqualTo("test@test.com"));
             });
+        }
+
+        [Test]
+        public async Task WhenFindByIdIsCalledAndUserDoesNotExistsThenNullIsReturned()
+        {
+            Models.ApplicationUser user = await this.userRepository.FindByIdAsync(Guid.NewGuid().ToString());
+
+            Assert.That(user, Is.Null);
         }
 
         [Test]
@@ -117,7 +126,7 @@ namespace BudgetPlanner.IntegrationTests
 
             this.databaseHelper.Insert(usersToInsert);
 
-            decimal balance = await this.userRepository.GetBalance("Keah");
+            decimal balance = await this.userRepository.GetBalanceAsync("Keah");
 
             Assert.That(balance, Is.EqualTo(23.15M));
         }
