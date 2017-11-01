@@ -32,6 +32,7 @@ namespace BudgetPlanner
             services.AddSingleton(this.Configuration);
             services.AddSingleton<IDbConnectionFactory>(s => new SqlConnectionFactory(this.Configuration.GetConnectionString("BudgetPlanner")));
             services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<ICategoryGroupRepository, CategoryGroupRepository>();
             services.AddIdentity<ApplicationUser, ApplicationRole>().AddDefaultTokenProviders();
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
             services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();

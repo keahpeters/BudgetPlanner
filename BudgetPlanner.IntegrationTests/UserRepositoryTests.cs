@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BudgetPlanner.IntegrationTests.DatabaseModels;
 using BudgetPlanner.Repositories;
 using Moq;
 using NUnit.Framework;
@@ -70,6 +71,14 @@ namespace BudgetPlanner.IntegrationTests
         }
 
         [Test]
+        public async Task WhenFindByIdIsCalledAndUserDoesNotExistsThenNullIsReturned()
+        {
+            Models.ApplicationUser user = await this.userRepository.FindByIdAsync(Guid.NewGuid().ToString());
+
+            Assert.That(user, Is.Null);
+        }
+
+        [Test]
         public async Task WhenFindByNameIsCalledAndUserDoesNotExistsThenNullIsReturned()
         {
             Models.ApplicationUser user = await this.userRepository.FindByNameAsync("Keah");
@@ -100,14 +109,6 @@ namespace BudgetPlanner.IntegrationTests
                 Assert.That(user.PasswordHash, Is.EqualTo("Test"));
                 Assert.That(user.Email, Is.EqualTo("test@test.com"));
             });
-        }
-
-        [Test]
-        public async Task WhenFindByIdIsCalledAndUserDoesNotExistsThenNullIsReturned()
-        {
-            Models.ApplicationUser user = await this.userRepository.FindByIdAsync(Guid.NewGuid().ToString());
-
-            Assert.That(user, Is.Null);
         }
 
         [Test]

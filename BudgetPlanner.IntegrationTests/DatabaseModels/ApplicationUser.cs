@@ -1,7 +1,6 @@
-﻿using System;
-using ServiceStack.DataAnnotations;
+﻿using ServiceStack.DataAnnotations;
 
-namespace BudgetPlanner.IntegrationTests
+namespace BudgetPlanner.IntegrationTests.DatabaseModels
 {
     /// <summary>
     ///     This class is used to create the ApplicationUser table in the in memory sqlite database
