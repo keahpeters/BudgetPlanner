@@ -1,5 +1,27 @@
-﻿@model decimal
+﻿@using BudgetPlanner.Models
+@model IndexViewModel
 
 <div class="text-center">
-    <button type="button" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model)</button>
+    <button type="button" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model.Balance)</button>
 </div>
+
+<table class="table">
+    <tr>
+        <th>Category</th>
+        <th>Available</th>
+    </tr>
+    @foreach (CategoryGroup categoryGroup in Model.CategoryGroups)
+    {
+        <tr class="info">
+            <td>@categoryGroup.Name</td>
+            <td>@string.Format("{0:C}", categoryGroup.Categories.Sum(c => c.Budget))</td>
+        </tr>
+        foreach (Category category in categoryGroup.Categories)
+         {
+             <tr>
+                 <td>@category.Name</td>
+                 <td>@string.Format("{0:C}", category.Budget)</td>
+             </tr>
+         }
+    }
+</table>

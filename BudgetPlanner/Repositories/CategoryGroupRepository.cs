@@ -9,7 +9,7 @@ namespace BudgetPlanner.Repositories
 {
     public interface ICategoryGroupRepository
     {
-        Task<IEnumerable<CategoryGroup>> GetByUserName(string userName);
+        Task<IEnumerable<CategoryGroup>> GetByUserNameAsync(string userName);
     }
 
     public class CategoryGroupRepository : ICategoryGroupRepository
@@ -21,7 +21,7 @@ namespace BudgetPlanner.Repositories
             this.dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
         }
 
-        public async Task<IEnumerable<CategoryGroup>> GetByUserName(string userName)
+        public async Task<IEnumerable<CategoryGroup>> GetByUserNameAsync(string userName)
         {
             const string sql = @"SELECT
 	                                cg.Id, cg.Name, c.Id, c.Name, c.Budget
