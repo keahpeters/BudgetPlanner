@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using BudgetPlanner.Repositories;
 using BudgetPlanner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,8 +15,8 @@ namespace BudgetPlanner.Controllers
 
         public HomeController(IUserRepository userRepository, ICategoryGroupRepository categoryGroupRepository)
         {
-            this.userRepository = userRepository;
-            this.categoryGroupRepository = categoryGroupRepository;
+            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            this.categoryGroupRepository = categoryGroupRepository ?? throw new ArgumentNullException(nameof(categoryGroupRepository));
         }
 
         [HttpGet]
