@@ -58,9 +58,12 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenIndexGetMethodIsCalledThenBalanceIsSetOnModel()
+        public async Task WhenIndexGetMethodIsCalledThenApplicationUserIsSetOnModel()
         {
-            this.userRepository.Setup(u => u.GetBalanceAsync(It.IsAny<string>())).ReturnsAsync(2000.01M);
+            this.userRepository.Setup(u => u.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser
+            {
+                UserName = "TestUser"
+            });
 
             IActionResult result = await this.homeController.Index();
 
@@ -68,7 +71,7 @@ namespace BudgetPlanner.Tests.Controllers
 
             var model = (IndexViewModel)((ViewResult) result).Model;
 
-            Assert.That(model.Balance, Is.EqualTo(2000.01M));
+            Assert.That(model.ApplicationUser.UserName, Is.EqualTo("TestUser"));
         }
 
         [Test]

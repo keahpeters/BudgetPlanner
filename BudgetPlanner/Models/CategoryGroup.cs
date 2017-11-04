@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BudgetPlanner.Models
 {
@@ -6,8 +8,12 @@ namespace BudgetPlanner.Models
     {
         public int Id { get; set; }
 
+        [Required]
+        [MaxLength(50)]
         public string Name { get; set; }
 
         public List<Category> Categories { get; set; }
+
+        public Guid UserId { get; set; }
     }
 }

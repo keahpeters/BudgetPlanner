@@ -1,27 +1,35 @@
 ﻿@using BudgetPlanner.Models
 @model IndexViewModel
+    
+@{
+    ViewBag.Title = "Home";
+}    
 
 <div class="text-center">
-    <button type="button" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model.Balance)</button>
+    <button type="button" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model.ApplicationUser.Balance)</button>
 </div>
 
-<table class="table">
-    <tr>
-        <th>Category</th>
-        <th>Available</th>
-    </tr>
-    @foreach (CategoryGroup categoryGroup in Model.CategoryGroups)
-    {
-        <tr class="info">
-            <td>@categoryGroup.Name</td>
-            <td>@string.Format("{0:C}", categoryGroup.Categories.Sum(c => c.Budget))</td>
+<div>
+    <a class="btn btn-default btn-sm" asp-action="AddCategoryGroup">Add Category Group</a>
+    
+    <table class="table categories">
+        <tr>
+            <th>Category</th>
+            <th>Available</th>
         </tr>
-        foreach (Category category in categoryGroup.Categories)
-         {
-             <tr>
-                 <td>@category.Name</td>
-                 <td>@string.Format("{0:C}", category.Budget)</td>
-             </tr>
-         }
-    }
-</table>
+        @foreach (CategoryGroup categoryGroup in Model.CategoryGroups)
+        {
+            <tr class="info">
+                <td>@categoryGroup.Name</td>
+                <td>@string.Format("{0:C}", categoryGroup.Categories.Where(c => c != null).Sum(c => c.Budget))</td>
+            </tr>
+            foreach (Category category in categoryGroup.Categories)
+            {
+                <tr>
+                    <td>@category.Name</td>
+                    <td>@string.Format("{0:C}", category.Budget)</td>
+                </tr>
+            }
+        }
+    </table>
+</div>

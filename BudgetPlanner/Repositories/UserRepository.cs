@@ -17,8 +17,6 @@ namespace BudgetPlanner.Repositories
         Task<ApplicationUser> FindByNameAsync(string userName);
 
         Task<ApplicationUser> FindByIdAsync(string userId);
-
-        Task<decimal> GetBalanceAsync(string userName);
     }
 
     public class UserRepository : IUserRepository
@@ -56,7 +54,7 @@ namespace BudgetPlanner.Repositories
 
         public async Task<ApplicationUser> FindByNameAsync(string userName)
         {
-            const string sql = @"SELECT Id, Email, PasswordHash, UserName
+            const string sql = @"SELECT Id, Email, PasswordHash, UserName, Balance
                             FROM ApplicationUser
                             WHERE UserName = @userName";
 
@@ -70,7 +68,7 @@ namespace BudgetPlanner.Repositories
 
         public async Task<ApplicationUser> FindByIdAsync(string userId)
         {
-            const string sql = @"SELECT Id, Email, PasswordHash, UserName
+            const string sql = @"SELECT Id, Email, PasswordHash, UserName, Balance
                             FROM ApplicationUser
                             WHERE Id = @userId";
 
@@ -79,18 +77,6 @@ namespace BudgetPlanner.Repositories
                 IEnumerable<ApplicationUser> user = await dbConnection.QueryAsync<ApplicationUser>(sql, new { userId }).ConfigureAwait(false);
 
                 return user.FirstOrDefault();
-            }
-        }
-
-        public async Task<decimal> GetBalanceAsync(string userName)
-        {
-            const string sql = @"SELECT balance FROM ApplicationUser Where UserName = @userName";
-
-            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
-            {
-                IEnumerable<decimal> balance = await dbConnection.QueryAsync<decimal>(sql, new { userName }).ConfigureAwait(false);
-
-                return balance.FirstOrDefault();
             }
         }
     }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BudgetPlanner.Infrastructure;
+using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
 using BudgetPlanner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -24,11 +26,43 @@ namespace BudgetPlanner.Controllers
         {
             var model = new IndexViewModel
             {
-                Balance = await this.userRepository.GetBalanceAsync(this.User.Identity.Name),
+                ApplicationUser = await this.userRepository.FindByNameAsync(this.User.Identity.Name),
                 CategoryGroups = await this.categoryGroupRepository.GetByUserNameAsync(this.User.Identity.Name)
             };
 
             return this.View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AddCategoryGroup()
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCategoryGroup(CategoryGroup categoryGroup)
+        {
+            if (ModelState.IsValid)
+            {
+                ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
+                categoryGroup.UserId = user.Id;
+
+                try
+                {
+                    await this.categoryGroupRepository.Add(categoryGroup);
+                    return this.RedirectToAction("Index");
+                }
+                catch (EntityAlreadyExistsException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "A category group with this name already exists.");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to add category group, an unexpected error occured.");
+                }
+            }
+
+            return this.View(categoryGroup);
         }
     }
 }
