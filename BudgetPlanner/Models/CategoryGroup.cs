@@ -17,6 +17,6 @@ namespace BudgetPlanner.Models
 
         public Guid UserId { get; set; }
 
-        public decimal Budget => this.Categories.Sum(c => c.Budget);
+        public decimal Budget => this.Categories?.Sum(c => c.Budget) ?? 0.00M;
     }
 }

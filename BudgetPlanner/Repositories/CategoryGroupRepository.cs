@@ -14,7 +14,11 @@ namespace BudgetPlanner.Repositories
     {
         Task<IEnumerable<CategoryGroup>> GetByUserNameAsync(string userName);
 
+        Task<CategoryGroup> Get(int id);
+
         Task Add(CategoryGroup categoryGroup);
+
+        Task Update(CategoryGroup categoryGroup);
     }
 
     public class CategoryGroupRepository : ICategoryGroupRepository
@@ -66,6 +70,18 @@ namespace BudgetPlanner.Repositories
             }
         }
 
+        public async Task<CategoryGroup> Get(int id)
+        {
+            const string sql = "SELECT Id, Name, UserId FROM CategoryGroup WHERE Id = @id";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                IEnumerable<CategoryGroup> results = await dbConnection.QueryAsync<CategoryGroup>(sql, new { id }).ConfigureAwait(false);
+
+                return results.FirstOrDefault();
+            }
+        }
+
         public async Task Add(CategoryGroup categoryGroup)
         {
             const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name";
@@ -77,9 +93,7 @@ namespace BudgetPlanner.Repositories
                 IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name }).ConfigureAwait(false);
 
                 if (result.Any())
-                {
                     throw new EntityAlreadyExistsException("Category group already exists");
-                }
             }
 
             using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
@@ -95,6 +109,38 @@ namespace BudgetPlanner.Repositories
                 catch (SqlException ex)
                 {
                     throw new RepositoryException("Failed to add category group", ex);
+                }
+            }
+        }
+
+        public async Task Update(CategoryGroup categoryGroup)
+        {
+            const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name";
+            const string updateSql = @"UPDATE CategoryGroup
+                                        SET Name = @Name
+                                        WHERE Id = @Id";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name }).ConfigureAwait(false);
+
+                if (result.Any())
+                    throw new EntityAlreadyExistsException("Category group already exists");
+            }
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                try
+                {
+                    await dbConnection.ExecuteAsync(updateSql, new
+                    {
+                        categoryGroup.Id,
+                        categoryGroup.Name
+                    }).ConfigureAwait(false);
+                }
+                catch (SqlException ex)
+                {
+                    throw new RepositoryException("Failed to update category group", ex);
                 }
             }
         }

@@ -163,7 +163,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenLoginPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
@@ -171,7 +171,98 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenLoginPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.categoryGroupRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new CategoryGroup());
+
+            IActionResult result = await this.homeController.EditCategoryGroup(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.categoryGroupRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new CategoryGroup());
+
+            IActionResult result = await this.homeController.EditCategoryGroup(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.homeController.EditCategoryGroup(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.EditCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.EditCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Update(It.IsAny<CategoryGroup>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+
+            await this.homeController.EditCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Update(It.IsAny<CategoryGroup>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.EditCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
