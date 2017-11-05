@@ -35,7 +35,7 @@ namespace BudgetPlanner.Repositories
         public async Task<IEnumerable<CategoryGroup>> GetByUserNameAsync(string userName)
         {
             const string sql = @"SELECT
-	                                cg.Id, cg.Name, c.Id, c.Name, c.Budget
+	                                cg.Id, cg.Name, c.Id, c.Name, c.Budget, c.CategoryGroupId
                                 FROM 
 	                                CategoryGroup cg
 	                                LEFT OUTER JOIN Category c ON cg.Id = c.CategoryGroupId
@@ -86,13 +86,13 @@ namespace BudgetPlanner.Repositories
 
         public async Task Add(CategoryGroup categoryGroup)
         {
-            const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name";
+            const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name AND UserId = @UserId";
             const string insertSql = @"INSERT INTO CategoryGroup (UserId, Name)
                                     VALUES (@UserId, @Name)";
 
             using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name }).ConfigureAwait(false);
+                IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name, categoryGroup.UserId }).ConfigureAwait(false);
 
                 if (result.Any())
                     throw new EntityAlreadyExistsException("Category group already exists");
@@ -117,14 +117,14 @@ namespace BudgetPlanner.Repositories
 
         public async Task Update(CategoryGroup categoryGroup)
         {
-            const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name";
+            const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name AND UserId = @UserId";
             const string updateSql = @"UPDATE CategoryGroup
                                         SET Name = @Name
                                         WHERE Id = @Id";
 
             using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
             {
-                IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name }).ConfigureAwait(false);
+                IEnumerable<int> result = await dbConnection.QueryAsync<int>(existsSql, new { categoryGroup.Name, categoryGroup.UserId }).ConfigureAwait(false);
 
                 if (result.Any())
                     throw new EntityAlreadyExistsException("Category group already exists");

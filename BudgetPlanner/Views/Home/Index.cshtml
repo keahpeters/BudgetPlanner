@@ -23,6 +23,7 @@
                 <td>
                     <a asp-action="EditCategoryGroup" asp-route-id="@categoryGroup.Id">@categoryGroup.Name</a>
                     <a class="btn btn-xs btn-danger pull-right" asp-action="DeleteCategoryGroup" asp-route-id="@categoryGroup.Id" asp-route-name="@categoryGroup.Name">Delete</a>
+                    <a class="btn btn-xs btn-default pull-right" asp-action="AddCategory" asp-route-categoryGroupId="@categoryGroup.Id">Add Category</a>
                 </td>
                 <td>@string.Format("{0:C}", categoryGroup.Budget)</td>
             </tr>

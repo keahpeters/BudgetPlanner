@@ -23,7 +23,8 @@ namespace BudgetPlanner.Tests.Controllers
         {
             this.userRepository = new Mock<IUserRepository>();
             this.categoryGroupRepository = new Mock<ICategoryGroupRepository>();
-            this.homeController = new HomeController(this.userRepository.Object, this.categoryGroupRepository.Object);
+            this.categoryRepository = new Mock<ICategoryRepository>();
+            this.homeController = new HomeController(this.userRepository.Object, this.categoryGroupRepository.Object, this.categoryRepository.Object);
             this.SetUpContext(this.homeController);
 
             this.userRepository.Setup(u => u.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "TestUser", Id = Guid.NewGuid() });
@@ -31,6 +32,7 @@ namespace BudgetPlanner.Tests.Controllers
 
         private Mock<IUserRepository> userRepository;
         private Mock<ICategoryGroupRepository> categoryGroupRepository;
+        private Mock<ICategoryRepository> categoryRepository;
         private HomeController homeController;
 
         private void SetUpContext(HomeController controller)
@@ -47,7 +49,13 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public void WhenCategoryGroupRepositoryIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(this.userRepository.Object, null));
+            Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(this.userRepository.Object, null, this.categoryRepository.Object));
+        }
+
+        [Test]
+        public void WhenCategoryGroupIsNullThenThrowNullArguementException()
+        {
+            Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(this.userRepository.Object, this.categoryGroupRepository.Object, null));
         }
 
         [Test]
@@ -99,7 +107,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public void WhenUserRepositoryIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(null, this.categoryGroupRepository.Object));
+            Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(null, this.categoryGroupRepository.Object, this.categoryRepository.Object));
         }
 
         [Test]
@@ -356,6 +364,85 @@ namespace BudgetPlanner.Tests.Controllers
         public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public void WhenAddCategoryGetMethodIsCalledThenViewResultIsReturned()
+        {
+            IActionResult result = this.homeController.AddCategory(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public void WhenAddCategoryGetMethodIsCalledThenUseDefaultView()
+        {
+            IActionResult result = this.homeController.AddCategory(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AddCategory(new Category());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AddCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Add(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+
+            await this.homeController.AddCategory(new Category());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Add(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.AddCategory(new Category());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AddCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.AddCategory(new Category());
 
             Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
 

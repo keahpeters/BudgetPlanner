@@ -12,11 +12,13 @@ namespace BudgetPlanner.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+        private readonly ICategoryRepository categoryRepository;
         private readonly ICategoryGroupRepository categoryGroupRepository;
         private readonly IUserRepository userRepository;
 
-        public HomeController(IUserRepository userRepository, ICategoryGroupRepository categoryGroupRepository)
+        public HomeController(IUserRepository userRepository, ICategoryGroupRepository categoryGroupRepository, ICategoryRepository categoryRepository)
         {
+            this.categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
             this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             this.categoryGroupRepository = categoryGroupRepository ?? throw new ArgumentNullException(nameof(categoryGroupRepository));
         }
@@ -131,6 +133,37 @@ namespace BudgetPlanner.Controllers
             }
 
             return this.View(categoryGroup);
+        }
+
+        [HttpGet]
+        public IActionResult AddCategory(int categoryGroupId)
+        {
+            Category model = new Category { CategoryGroupId = categoryGroupId };
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(Category category)
+        {
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.categoryRepository.Add(category);
+                    return this.RedirectToAction("Index");
+                }
+                catch (EntityAlreadyExistsException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "A category with this name already exists for this category group.");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to add category, an unexpected error occured.");
+                }
+            }
+
+            return this.View(category);
         }
     }
 }

@@ -1,22 +1,22 @@
-﻿@model BudgetPlanner.Models.CategoryGroup
+﻿@model BudgetPlanner.Models.Category
 
 @{
-    ViewBag.Title = "Add Category Group";
+    ViewBag.Title = "Add Category";
 }
 
-<h1>Add Category Group</h1>
+<h1>Add Category</h1>
 
 <form method="post">
     <div asp-validation-summary="ModelOnly"></div>
-    
+
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name"></span>
     </div>
-    
+
     <div>
         <a class="btn btn-default" asp-action="Index">Back</a>
-        <input type="submit" value="Add" class="btn btn-default"/>
+        <input type="submit" value="Add" class="btn btn-default" />
     </div>
 </form>
