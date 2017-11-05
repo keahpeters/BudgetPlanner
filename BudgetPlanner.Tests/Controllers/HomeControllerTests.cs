@@ -449,5 +449,96 @@ namespace BudgetPlanner.Tests.Controllers
             Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
             Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
         }
+
+        [Test]
+        public async Task WhenEditCategoryGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+
+            IActionResult result = await this.homeController.EditCategory(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+
+            IActionResult result = await this.homeController.EditCategory(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditCategoryGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.homeController.EditCategory(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.EditCategory(new Category());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.EditCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+
+            await this.homeController.EditCategory(new Category());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.EditCategory(new Category());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AddCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.AddCategory(new Category());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
     }
 }

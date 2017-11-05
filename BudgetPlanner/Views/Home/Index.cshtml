@@ -30,7 +30,7 @@
             foreach (Category category in categoryGroup.Categories)
             {
                 <tr>
-                    <td>@category.Name</td>
+                    <td><a asp-action="EditCategory" asp-route-id="@category.Id" asp-route-categoryGroupId="@categoryGroup.Id">@category.Name</a></td>
                     <td>@string.Format("{0:C}", category.Budget)</td>
                 </tr>
             }

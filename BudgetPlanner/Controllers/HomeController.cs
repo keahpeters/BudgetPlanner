@@ -165,5 +165,39 @@ namespace BudgetPlanner.Controllers
 
             return this.View(category);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            Category model = await this.categoryRepository.Get(id);
+
+            if (model == null)
+                return this.RedirectToAction("Index");
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditCategory(Category category)
+        {
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.categoryRepository.Update(category);
+                    return this.RedirectToAction("Index");
+                }
+                catch (EntityAlreadyExistsException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "A category with this name already exists for this category group.");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to edit category, an unexpected error occured.");
+                }
+            }
+
+            return this.View(category);
+        }
     }
 }
