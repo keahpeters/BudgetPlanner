@@ -271,5 +271,96 @@ namespace BudgetPlanner.Tests.Controllers
             Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
             Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
         }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.categoryGroupRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new CategoryGroup());
+
+            IActionResult result = await this.homeController.DeleteCategoryGroup(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.categoryGroupRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new CategoryGroup());
+
+            IActionResult result = await this.homeController.DeleteCategoryGroup(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.homeController.DeleteCategoryGroup(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndCategoryGroupHasCategoriesAssignedThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Delete(It.IsAny<int>())).ThrowsAsync(new ChildEntitiesExistException("Test"));
+
+            await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Delete(It.IsAny<int>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
     }
 }

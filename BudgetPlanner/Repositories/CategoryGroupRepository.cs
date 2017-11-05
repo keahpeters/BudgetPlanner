@@ -19,6 +19,8 @@ namespace BudgetPlanner.Repositories
         Task Add(CategoryGroup categoryGroup);
 
         Task Update(CategoryGroup categoryGroup);
+
+        Task Delete(int id);
     }
 
     public class CategoryGroupRepository : ICategoryGroupRepository
@@ -141,6 +143,32 @@ namespace BudgetPlanner.Repositories
                 catch (SqlException ex)
                 {
                     throw new RepositoryException("Failed to update category group", ex);
+                }
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            const string categoriesExistSql = "SELECT 1 FROM Category WHERE CategoryGroupId = @id";
+            const string deleteSql = "DELETE FROM CategoryGroup WHERE Id = @id";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                IEnumerable<int> result = await dbConnection.QueryAsync<int>(categoriesExistSql, new { id }).ConfigureAwait(false);
+
+                if (result.Any())
+                    throw new ChildEntitiesExistException("Category group has categories assigned to it");
+            }
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                try
+                {
+                    await dbConnection.ExecuteAsync(deleteSql, new { id }).ConfigureAwait(false);
+                }
+                catch (SqlException ex)
+                {
+                    throw new RepositoryException("Failed to delete category group", ex);
                 }
             }
         }

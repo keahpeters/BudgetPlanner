@@ -20,7 +20,10 @@
         @foreach (CategoryGroup categoryGroup in Model.CategoryGroups)
         {
             <tr class="info">
-                <td><a asp-action="EditCategoryGroup" asp-route-id="@categoryGroup.Id">@categoryGroup.Name</a></td>
+                <td>
+                    <a asp-action="EditCategoryGroup" asp-route-id="@categoryGroup.Id">@categoryGroup.Name</a>
+                    <a class="btn btn-xs btn-danger pull-right" asp-action="DeleteCategoryGroup" asp-route-id="@categoryGroup.Id" asp-route-name="@categoryGroup.Name">Delete</a>
+                </td>
                 <td>@string.Format("{0:C}", categoryGroup.Budget)</td>
             </tr>
             foreach (Category category in categoryGroup.Categories)

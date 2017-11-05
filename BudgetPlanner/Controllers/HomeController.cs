@@ -12,8 +12,8 @@ namespace BudgetPlanner.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly IUserRepository userRepository;
         private readonly ICategoryGroupRepository categoryGroupRepository;
+        private readonly IUserRepository userRepository;
 
         public HomeController(IUserRepository userRepository, ICategoryGroupRepository categoryGroupRepository)
         {
@@ -42,7 +42,7 @@ namespace BudgetPlanner.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCategoryGroup(CategoryGroup categoryGroup)
         {
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
                 ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
                 categoryGroup.UserId = user.Id;
@@ -71,9 +71,7 @@ namespace BudgetPlanner.Controllers
             CategoryGroup model = await this.categoryGroupRepository.Get(id);
 
             if (model == null)
-            {
                 return this.RedirectToAction("Index");
-            }
 
             return this.View(model);
         }
@@ -81,7 +79,7 @@ namespace BudgetPlanner.Controllers
         [HttpPost]
         public async Task<IActionResult> EditCategoryGroup(CategoryGroup categoryGroup)
         {
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
                 try
                 {
@@ -95,6 +93,40 @@ namespace BudgetPlanner.Controllers
                 catch (RepositoryException)
                 {
                     this.ModelState.AddModelError(string.Empty, "Failed to edit category group, an unexpected error occured.");
+                }
+            }
+
+            return this.View(categoryGroup);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteCategoryGroup(int id)
+        {
+            CategoryGroup model = await this.categoryGroupRepository.Get(id);
+
+            if (model == null)
+                return this.RedirectToAction("Index");
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategoryGroup(CategoryGroup categoryGroup)
+        {
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.categoryGroupRepository.Delete(categoryGroup.Id);
+                    return this.RedirectToAction("Index");
+                }
+                catch (ChildEntitiesExistException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "This category group has categories assigned. Please delete child categories before deleting category group.");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to delete category group, an unexpected error occured.");
                 }
             }
 
