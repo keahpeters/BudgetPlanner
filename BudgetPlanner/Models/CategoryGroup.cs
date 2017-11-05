@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace BudgetPlanner.Models
 {
@@ -15,5 +16,7 @@ namespace BudgetPlanner.Models
         public List<Category> Categories { get; set; }
 
         public Guid UserId { get; set; }
+
+        public decimal Budget => this.Categories.Sum(c => c.Budget);
     }
 }

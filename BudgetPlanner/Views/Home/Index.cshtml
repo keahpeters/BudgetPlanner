@@ -21,7 +21,7 @@
         {
             <tr class="info">
                 <td>@categoryGroup.Name</td>
-                <td>@string.Format("{0:C}", categoryGroup.Categories.Where(c => c != null).Sum(c => c.Budget))</td>
+                <td>@string.Format("{0:C}", categoryGroup.Budget)</td>
             </tr>
             foreach (Category category in categoryGroup.Categories)
             {

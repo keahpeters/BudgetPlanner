@@ -53,7 +53,10 @@ namespace BudgetPlanner.Repositories
 
                         if (categoryGroup.Categories == null)
                             categoryGroup.Categories = new List<Category>();
-                        categoryGroup.Categories.Add(c);
+
+                        if (c != null)
+                            categoryGroup.Categories.Add(c);
+
                         return categoryGroup;
                     },
                     new { userName }

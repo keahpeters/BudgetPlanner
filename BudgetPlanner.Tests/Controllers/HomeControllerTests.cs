@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using BudgetPlanner.Controllers;
+using BudgetPlanner.Infrastructure;
 using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
 using BudgetPlanner.ViewModels;
@@ -24,6 +25,8 @@ namespace BudgetPlanner.Tests.Controllers
             this.categoryGroupRepository = new Mock<ICategoryGroupRepository>();
             this.homeController = new HomeController(this.userRepository.Object, this.categoryGroupRepository.Object);
             this.SetUpContext(this.homeController);
+
+            this.userRepository.Setup(u => u.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "TestUser", Id = Guid.NewGuid() });
         }
 
         private Mock<IUserRepository> userRepository;
@@ -97,6 +100,85 @@ namespace BudgetPlanner.Tests.Controllers
         public void WhenUserRepositoryIsNullThenThrowNullArguementException()
         {
             Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(null, this.categoryGroupRepository.Object));
+        }
+
+        [Test]
+        public void WhenAddCategoryGroupGetMethodIsCalledThenViewResultIsReturned()
+        {
+            IActionResult result = this.homeController.AddCategoryGroup();
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public void WhenAddCategoryGroupGetMethodIsCalledThenUseDefaultView()
+        {
+            IActionResult result = this.homeController.AddCategoryGroup();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Add(It.IsAny<CategoryGroup>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+
+            await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryGroupRepository.Setup(c => c.Add(It.IsAny<CategoryGroup>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenLoginPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenLoginPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
         }
     }
 }
