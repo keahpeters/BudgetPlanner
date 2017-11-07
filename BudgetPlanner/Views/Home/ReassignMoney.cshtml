@@ -1,0 +1,36 @@
+﻿@model ReassignMoneyViewModel
+
+@{
+    ViewBag.Title = "Unassign Money";
+}
+
+<h1>Unassign Money</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    
+    <input asp-for="SourceCategoryId" type="hidden" />
+
+    <div class="form-group">
+        <label asp-for="Amount"></label>
+        <input asp-for="Amount" class="form-control" />
+        <span asp-validation-for="Amount"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Category</label>
+        <select asp-for="DestinationCategoryId" asp-items="@(new SelectList(Model.Categories, "Id", "Name", Model.DestinationCategoryId, "CategoryGroup"))" class="form-control"></select>
+        <span asp-validation-for="DestinationCategoryId"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Unassign"></label>
+        <input asp-for="Unassign" class="form-check-input" />
+        <span asp-validation-for="Unassign"></span>
+    </div>
+
+    <div>
+        <a class="btn btn-default" asp-action="Index">Back</a>
+        <input type="submit" value="Reassign" class="btn btn-default" />
+    </div>
+</form>

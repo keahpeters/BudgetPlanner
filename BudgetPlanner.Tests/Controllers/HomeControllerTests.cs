@@ -690,7 +690,7 @@ namespace BudgetPlanner.Tests.Controllers
         {
             this.categoryRepository.Setup(c => c.AssignMoney(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>())).ThrowsAsync(new RepositoryException("Test"));
 
-            await this.homeController.AssignMoney(new AssignMoneyViewModel());
+            await this.homeController.AssignMoney(new AssignMoneyViewModel { Amount = 1.00M});
 
             Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
         }
@@ -720,6 +720,114 @@ namespace BudgetPlanner.Tests.Controllers
             await this.homeController.AssignMoney(new AssignMoneyViewModel { Amount = -1.00M });
 
             Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            IActionResult result = await this.homeController.ReassignMoney(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            IActionResult result = await this.homeController.ReassignMoney(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyGetMethodIsCalledThenCategoriesAreSetOnModel()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<Guid>())).ReturnsAsync(
+                new List<Category> { new Category(), new Category() });
+
+            IActionResult result = await this.homeController.ReassignMoney(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            var model = (ReassignMoneyViewModel)((ViewResult) result).Model;
+
+            Assert.That(model.Categories.Count(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.ReassignMoney(new ReassignMoneyViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.ReassignMoney(new ReassignMoneyViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndOperationFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.ReassignMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.ReassignMoney(new ReassignMoneyViewModel { Amount = 1.00M, Unassign = false});
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndMoneyIsAssignedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.ReassignMoney(new ReassignMoneyViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.ReassignMoney(new ReassignMoneyViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndAmountIsLessThanZeroThenAddModelError()
+        {
+            await this.homeController.ReassignMoney(new ReassignMoneyViewModel() { Amount = -1.00M });
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndUnassignIsTrueOnModelThenCallUnassignOnRepository()
+        {
+            await this.homeController.ReassignMoney(new ReassignMoneyViewModel() { Amount = 1.00M, Unassign = true });
+
+            this.categoryRepository.Verify(c => c.UnassignMoney(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>()));
+        }
+
+        [Test]
+        public async Task WhenReassignMoneyPostMethodIsCalledAndUnassignIsFalseOnModelThenCallReassignOnRepository()
+        {
+            await this.homeController.ReassignMoney(new ReassignMoneyViewModel() { Amount = 1.00M, Unassign = false });
+
+            this.categoryRepository.Verify(c => c.ReassignMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>()));
         }
     }
 }

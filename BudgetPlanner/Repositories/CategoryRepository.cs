@@ -23,6 +23,10 @@ namespace BudgetPlanner.Repositories
         Task Delete(int id);
 
         Task AssignMoney(int id, decimal amount, Guid userId);
+
+        Task ReassignMoney(int sourceCategoryid, int destinationCategoryId, decimal amount);
+
+        Task UnassignMoney(int sourceCategoryid, decimal amount, Guid userId);
     }
 
     public class CategoryRepository : ICategoryRepository
@@ -162,6 +166,54 @@ namespace BudgetPlanner.Repositories
                 {
                     await dbConnection.ExecuteAsync(subtractFromBalanceSql, new { amount, userId }, transaction);
                     await dbConnection.ExecuteAsync(addToCategorySql, new { amount, id }, transaction);
+
+                    transaction.Commit();
+                }
+            }
+        }
+
+        public async Task ReassignMoney(int sourceCategoryid, int destinationCategoryId, decimal amount)
+        {
+            const string subtractFromCategorySql = @"UPDATE Category
+                                        SET Budget = Budget - @amount
+                                        WHERE Id = @sourceCategoryid";
+
+            const string addToCategorySql = @"UPDATE Category
+                                        SET Budget = Budget + @amount
+                                        WHERE Id = @destinationCategoryId";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+
+                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                {
+                    await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, transaction);
+                    await dbConnection.ExecuteAsync(addToCategorySql, new { amount, destinationCategoryId }, transaction);
+
+                    transaction.Commit();
+                }
+            }
+        }
+
+        public async Task UnassignMoney(int sourceCategoryid, decimal amount, Guid userId)
+        {
+            const string subtractFromCategorySql = @"UPDATE Category
+                                        SET Budget = Budget - @amount
+                                        WHERE Id = @sourceCategoryid";
+
+            const string addToBalanceSql = @"UPDATE ApplicationUser
+                                                    SET Balance = Balance + @amount
+                                                    WHERE Id = @userId";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+
+                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                {
+                    await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, transaction);
+                    await dbConnection.ExecuteAsync(addToBalanceSql, new { amount, userId }, transaction);
 
                     transaction.Commit();
                 }

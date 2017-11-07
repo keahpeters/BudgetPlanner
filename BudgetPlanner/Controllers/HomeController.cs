@@ -237,7 +237,7 @@ namespace BudgetPlanner.Controllers
         public async Task<IActionResult> AssignMoney()
         {
             ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
-            AssignMoneyViewModel model = new AssignMoneyViewModel
+            var model = new AssignMoneyViewModel
             {
                 Categories = await this.categoryRepository.Get(user.Id)
             };
@@ -257,7 +257,54 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryRepository.AssignMoney(model.CategoryId, model.Amount, user.Id);
+                    if (model.Amount != 0)
+                        await this.categoryRepository.AssignMoney(model.CategoryId, model.Amount, user.Id);
+
+                    return this.RedirectToAction("Index");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to assign money, an unexpected error occured.");
+                }
+            }
+
+            model.Categories = await this.categoryRepository.Get(user.Id);
+            return this.View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReassignMoney(int sourceCategoryId)
+        {
+            ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
+            var model = new ReassignMoneyViewModel
+            {
+                SourceCategoryId = sourceCategoryId,
+                Categories = await this.categoryRepository.Get(user.Id)
+            };
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReassignMoney(ReassignMoneyViewModel model)
+        {
+            ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
+
+            if (model.Amount < 0)
+                this.ModelState.AddModelError(string.Empty, "The amount can not be negative");
+
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    if (model.Amount != 0)
+                    {
+                        if (model.Unassign)
+                            await this.categoryRepository.UnassignMoney(model.SourceCategoryId, model.Amount, user.Id);
+                        else
+                            await this.categoryRepository.ReassignMoney(model.SourceCategoryId, model.DestinationCategoryId, model.Amount);
+                    }
+
                     return this.RedirectToAction("Index");
                 }
                 catch (RepositoryException)
