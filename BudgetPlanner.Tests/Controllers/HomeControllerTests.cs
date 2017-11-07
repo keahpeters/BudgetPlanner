@@ -171,7 +171,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenAddCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
@@ -179,7 +179,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenAddCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenAddCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
@@ -262,7 +262,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenEditCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
@@ -270,7 +270,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenEditCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenEditCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.AddCategoryGroup(new CategoryGroup());
 
@@ -353,7 +353,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
 
@@ -361,7 +361,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenDeleteCategoryGroupPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.DeleteCategoryGroup(new CategoryGroup());
 
@@ -432,7 +432,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenAddCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenAddCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.AddCategory(new Category());
 
@@ -440,7 +440,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenAddCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenAddCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.AddCategory(new Category());
 
@@ -523,7 +523,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenEditCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToActionResultIsReturned()
+        public async Task WhenEditCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
             IActionResult result = await this.homeController.AddCategory(new Category());
 
@@ -531,7 +531,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public async Task WhenEditCategoryPostMethodIsCalledAndAccountIsCreatedThenRedirectToCorrectAction()
+        public async Task WhenEditCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
             IActionResult result = await this.homeController.AddCategory(new Category());
 
@@ -539,6 +539,187 @@ namespace BudgetPlanner.Tests.Controllers
 
             Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
             Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+
+            IActionResult result = await this.homeController.DeleteCategory(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+
+            IActionResult result = await this.homeController.DeleteCategory(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.homeController.DeleteCategory(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.DeleteCategory(new Category());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.DeleteCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Delete(It.IsAny<int>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.DeleteCategory(new Category());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.DeleteCategory(new Category());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.DeleteCategory(new Category());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenDeleteCategoryPostMethodIsCalledAndBudgetIsNotZeroThenAddModelError()
+        {
+            await this.homeController.DeleteCategory(new Category { Budget = 1.00M });
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AssignMoney();
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            IActionResult result = await this.homeController.AssignMoney();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyGetMethodIsCalledThenCategoriesAreSetOnModel()
+        {
+            this.categoryRepository.Setup(c => c.Get(It.IsAny<Guid>())).ReturnsAsync(
+                new List<Category> { new Category(), new Category() });
+
+            IActionResult result = await this.homeController.AssignMoney();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            var model = (AssignMoneyViewModel)((ViewResult) result).Model;
+
+            Assert.That(model.Categories.Count(), Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AssignMoney(new AssignMoneyViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.homeController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.homeController.AssignMoney(new AssignMoneyViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndOperationFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.AssignMoney(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.homeController.AssignMoney(new AssignMoneyViewModel());
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndMoneyIsAssignedThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.homeController.AssignMoney(new AssignMoneyViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.homeController.AssignMoney(new AssignMoneyViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenAssignMoneyPostMethodIsCalledAndAmountIsLessThanZeroThenAddModelError()
+        {
+            await this.homeController.AssignMoney(new AssignMoneyViewModel { Amount = -1.00M });
+
+            Assert.That(this.homeController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
         }
     }
 }

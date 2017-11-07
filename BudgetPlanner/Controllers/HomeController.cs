@@ -199,5 +199,75 @@ namespace BudgetPlanner.Controllers
 
             return this.View(category);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            Category model = await this.categoryRepository.Get(id);
+
+            if (model == null)
+                return this.RedirectToAction("Index");
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategory(Category category)
+        {
+            if (category.Budget != 0)
+                this.ModelState.AddModelError(string.Empty, "The budget for this category must be 0.00 to delete it.");
+
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.categoryRepository.Delete(category.Id);
+                    return this.RedirectToAction("Index");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to delete category, an unexpected error occured.");
+                }
+            }
+
+            return this.View(category);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AssignMoney()
+        {
+            ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
+            AssignMoneyViewModel model = new AssignMoneyViewModel
+            {
+                Categories = await this.categoryRepository.Get(user.Id)
+            };
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignMoney(AssignMoneyViewModel model)
+        {
+            ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
+
+            if (model.Amount < 0)
+                this.ModelState.AddModelError(string.Empty, "The amount can not be negative");
+
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.categoryRepository.AssignMoney(model.CategoryId, model.Amount, user.Id);
+                    return this.RedirectToAction("Index");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to assign money, an unexpected error occured.");
+                }
+            }
+
+            model.Categories = await this.categoryRepository.Get(user.Id);
+            return this.View(model);
+        }
     }
 }

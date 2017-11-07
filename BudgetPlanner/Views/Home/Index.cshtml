@@ -6,7 +6,7 @@
 }    
 
 <div class="text-center">
-    <button type="button" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model.ApplicationUser.Balance)</button>
+    <a asp-action="AssignMoney" class="btn btn-primary btn-lg">@string.Format("{0:C}", Model.ApplicationUser.Balance)</a>
 </div>
 
 <div>
@@ -30,7 +30,10 @@
             foreach (Category category in categoryGroup.Categories)
             {
                 <tr>
-                    <td><a asp-action="EditCategory" asp-route-id="@category.Id" asp-route-categoryGroupId="@categoryGroup.Id">@category.Name</a></td>
+                    <td>
+                        <a asp-action="EditCategory" asp-route-id="@category.Id">@category.Name</a>
+                        <a class="btn btn-xs btn-danger pull-right" asp-action="DeleteCategory" asp-route-id="@category.Id">Delete</a>
+                    </td>
                     <td>@string.Format("{0:C}", category.Budget)</td>
                 </tr>
             }

@@ -14,9 +14,15 @@ namespace BudgetPlanner.Repositories
     {
         Task<Category> Get(int id);
 
+        Task<IEnumerable<Category>> Get(Guid userId);
+
         Task Add(Category category);
 
         Task Update(Category category);
+
+        Task Delete(int id);
+
+        Task AssignMoney(int id, decimal amount, Guid userId);
     }
 
     public class CategoryRepository : ICategoryRepository
@@ -37,6 +43,19 @@ namespace BudgetPlanner.Repositories
                 IEnumerable<Category> results = await dbConnection.QueryAsync<Category>(sql, new { id }).ConfigureAwait(false);
 
                 return results.FirstOrDefault();
+            }
+        }
+
+        public async Task<IEnumerable<Category>> Get(Guid userId)
+        {
+            const string sql = @"SELECT c.Id, c.Name, CategoryGroupId, cg.Name AS CategoryGroup, Budget 
+                                FROM Category c INNER JOIN CategoryGroup cg ON c.CategoryGroupId = cg.Id
+                                WHERE UserId = @userId
+                                ORDER BY c.Name";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                return await dbConnection.QueryAsync<Category>(sql, new { userId }).ConfigureAwait(false);
             }
         }
 
@@ -99,6 +118,52 @@ namespace BudgetPlanner.Repositories
                 catch (SqlException ex)
                 {
                     throw new RepositoryException("Failed to update category", ex);
+                }
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            Category category = await this.Get(id);
+
+            if (category.Budget != 0)
+                throw new RepositoryException("Category can not be deleted when budget is not 0.00");
+
+            const string sql = "DELETE FROM Category WHERE Id = @id";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                try
+                {
+                    await dbConnection.ExecuteAsync(sql, new { id }).ConfigureAwait(false);
+                }
+                catch (SqlException ex)
+                {
+                    throw new RepositoryException("Failed to delete category", ex);
+                }
+            }
+        }
+
+        public async Task AssignMoney(int id, decimal amount, Guid userId)
+        {
+            const string subtractFromBalanceSql = @"UPDATE ApplicationUser
+                                                    SET Balance = Balance - @amount
+                                                    WHERE Id = @userId";
+
+            const string addToCategorySql = @"UPDATE Category
+                                        SET Budget = Budget + @amount
+                                        WHERE Id = @id";
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+
+                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                {
+                    await dbConnection.ExecuteAsync(subtractFromBalanceSql, new { amount, userId }, transaction);
+                    await dbConnection.ExecuteAsync(addToCategorySql, new { amount, id }, transaction);
+
+                    transaction.Commit();
                 }
             }
         }

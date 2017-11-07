@@ -5,6 +5,8 @@
 <h1>Edit Category</h1>
 <form method="post">
     <div asp-validation-summary="ModelOnly"></div>
+    
+    <input asp-for="CategoryGroupId" type="hidden" />
 
     <div class="form-group">
         <label asp-for="Name"></label>

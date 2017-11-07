@@ -13,5 +13,7 @@ namespace BudgetPlanner.Models
         public decimal Budget { get; set; }
 
         public int CategoryGroupId { get; set; }
+
+        public string CategoryGroup { get; set; }
     }
 }

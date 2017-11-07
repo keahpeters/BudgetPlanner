@@ -1,0 +1,17 @@
+﻿@model BudgetPlanner.Models.Category
+@{
+    ViewBag.Title = "Delete Category";
+}
+<h1>Delete Category</h1>
+<form method="post">
+    Are you sure you want to delete the category group?
+
+    <div asp-validation-summary="ModelOnly"></div>
+    
+    <input asp-for="Budget" type="hidden" />
+
+    <div>
+        <a class="btn btn-default" asp-action="Index">Back</a>
+        <input type="submit" value="Delete" class="btn btn-default" />
+    </div>
+</form>
