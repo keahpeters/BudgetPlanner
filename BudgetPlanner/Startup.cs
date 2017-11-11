@@ -34,6 +34,7 @@ namespace BudgetPlanner
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<ICategoryGroupRepository, CategoryGroupRepository>();
             services.AddSingleton<ICategoryRepository, CategoryRepository>();
+            services.AddSingleton<ITransactionRepository, TransactionRepository>();
             services.AddIdentity<ApplicationUser, ApplicationRole>().AddDefaultTokenProviders();
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
             services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
