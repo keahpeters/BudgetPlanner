@@ -53,7 +53,7 @@ namespace BudgetPlanner.Tests.Controllers
         }
 
         [Test]
-        public void WhenCategoryGroupIsNullThenThrowNullArguementException()
+        public void WhenCategoryRepositoryIsNullThenThrowNullArguementException()
         {
             Assert.Throws<ArgumentNullException>(() => this.homeController = new HomeController(this.userRepository.Object, this.categoryGroupRepository.Object, null));
         }
@@ -80,7 +80,7 @@ namespace BudgetPlanner.Tests.Controllers
 
             Assume.That(result, Is.TypeOf(typeof(ViewResult)));
 
-            var model = (IndexViewModel)((ViewResult) result).Model;
+            var model = (BudgetViewModel)((ViewResult) result).Model;
 
             Assert.That(model.ApplicationUser.UserName, Is.EqualTo("TestUser"));
         }
@@ -99,7 +99,7 @@ namespace BudgetPlanner.Tests.Controllers
 
             Assume.That(result, Is.TypeOf(typeof(ViewResult)));
 
-            var model = (IndexViewModel)((ViewResult)result).Model;
+            var model = (BudgetViewModel)((ViewResult)result).Model;
 
             Assert.That(model.CategoryGroups.Count(), Is.EqualTo(3));
         }

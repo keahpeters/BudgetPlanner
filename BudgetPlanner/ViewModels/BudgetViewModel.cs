@@ -3,7 +3,7 @@ using BudgetPlanner.Models;
 
 namespace BudgetPlanner.ViewModels
 {
-    public class IndexViewModel
+    public class BudgetViewModel
     {
         public ApplicationUser ApplicationUser { get; set; }
 

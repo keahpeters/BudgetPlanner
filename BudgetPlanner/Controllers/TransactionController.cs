@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
@@ -15,8 +16,8 @@ namespace BudgetPlanner.Controllers
 
         public TransactionController(IUserRepository userRepository, ITransactionRepository transactionRepository)
         {
-            this.userRepository = userRepository;
-            this.transactionRepository = transactionRepository;
+            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            this.transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
         [HttpGet]

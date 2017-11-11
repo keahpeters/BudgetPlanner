@@ -26,7 +26,7 @@ namespace BudgetPlanner.Controllers
         [HttpGet]
         public async Task<ViewResult> Index()
         {
-            var model = new IndexViewModel
+            var model = new BudgetViewModel
             {
                 ApplicationUser = await this.userRepository.FindByNameAsync(this.User.Identity.Name),
                 CategoryGroups = await this.categoryGroupRepository.GetByUserNameAsync(this.User.Identity.Name)

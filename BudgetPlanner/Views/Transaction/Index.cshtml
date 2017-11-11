@@ -4,4 +4,26 @@
     ViewBag.Title = "Transactions";
 }   
 
-<h1>Transactions</h1>
+<div>
+    <table class="table">
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Payee</th>
+            <th>Memo</th>
+            <th>Outflow</th>
+            <th>Inflow</th>
+        </tr>
+        @foreach (Transaction transaction in Model)
+        {
+            <tr>
+                <td>@transaction.Date.ToLocalTime().ToShortDateString()</td>
+                <td>@transaction.Category</td>
+                <td>@transaction.Payee</td>
+                <td>@transaction.Memo</td>
+                <td>@(transaction.IsInTransaction ? string.Empty : string.Format("{0:C}", transaction.Amount))</td>
+                <td>@(transaction.IsInTransaction ? string.Format("{0:C}", transaction.Amount) : string.Empty)</td>
+            </tr>
+        }
+    </table>
+</div>

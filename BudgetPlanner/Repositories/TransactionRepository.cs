@@ -23,7 +23,7 @@ namespace BudgetPlanner.Repositories
 
         public async Task<IEnumerable<Transaction>> Get(Guid userId)
         {
-            const string sql = @"SELECT t.Id, UserId, [Date], c.Name, Amount, Payee, Memo, IsInTransaction
+            const string sql = @"SELECT t.Id, UserId, [Date], c.Name AS Category, Amount, Payee, Memo, IsInTransaction
                                 FROM [Transaction] t 
                                 LEFT OUTER JOIN Category c ON t.CategoryId = c.Id
                                 WHERE UserId = @UserId
