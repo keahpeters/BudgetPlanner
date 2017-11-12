@@ -525,7 +525,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
         {
-            IActionResult result = await this.homeController.AddCategory(new Category());
+            IActionResult result = await this.homeController.EditCategory(new Category());
 
             Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
         }
@@ -533,7 +533,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
         {
-            IActionResult result = await this.homeController.AddCategory(new Category());
+            IActionResult result = await this.homeController.EditCategory(new Category());
 
             Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
 

@@ -161,5 +161,130 @@ namespace BudgetPlanner.Tests.Controllers
             Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
             Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
         }
+
+        [Test]
+        public async Task WhenEditTransactionGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.transactionRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Transaction());
+
+            IActionResult result = await this.transactionController.EditTransaction(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.transactionRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Transaction());
+
+            IActionResult result = await this.transactionController.EditTransaction(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditTransactionGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.transactionController.EditTransaction(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.EditTransaction(new TransactionViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.EditTransaction(new TransactionViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.transactionController.EditTransaction(new TransactionViewModel());
+
+            Assert.That(this.transactionController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M });
+
+            IActionResult result = await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 1.00M });
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M });
+
+            IActionResult result = await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 1.00M });
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndAmountHasChangedThenUpdateAndReapplyTransaction()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M, CategoryId = 1, IsInTransaction = false });
+
+            await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 2.00M, CategoryId = 1, IsInTransaction = false });
+
+            this.transactionRepository.Verify(t => t.UpdateAndReapplyTransaction(It.IsAny<Transaction>(), It.IsAny<Transaction>()), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndCategoryHasChangedThenUpdateAndReapplyTransaction()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M, CategoryId = 1, IsInTransaction = false });
+
+            await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 1.00M, CategoryId = 2, IsInTransaction = false });
+
+            this.transactionRepository.Verify(t => t.UpdateAndReapplyTransaction(It.IsAny<Transaction>(), It.IsAny<Transaction>()), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndIsInTransactionHasChangedThenUpdateAndReapplyTransaction()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M, CategoryId = 1, IsInTransaction = false });
+
+            await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 1.00M, CategoryId = 1, IsInTransaction = true });
+
+            this.transactionRepository.Verify(t => t.UpdateAndReapplyTransaction(It.IsAny<Transaction>(), It.IsAny<Transaction>()), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenEditTransactionPostMethodIsCalledAndAmountCategoryAndIsInTransactionHaveNotChangedThenUpdate()
+        {
+            this.transactionRepository.Setup(t => t.Get(It.IsAny<int>())).ReturnsAsync(new Transaction { Amount = 1.00M, CategoryId = 1, IsInTransaction = false });
+
+            await this.transactionController.EditTransaction(new TransactionViewModel { Amount = 1.00M, CategoryId = 1, IsInTransaction = false });
+
+            this.transactionRepository.Verify(t => t.Update(It.IsAny<Transaction>()), Times.Once);
+        }
     }
 }

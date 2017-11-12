@@ -1,16 +1,16 @@
 ﻿@model TransactionViewModel
 
 @{
-    ViewBag.Title = "Add Transaction";
+    ViewBag.Title = "Edit Transaction";
 }
 
-<h1>Add Transaction</h1>
+<h1>Edit Transaction</h1>
 
 <form method="post">
     @Html.Partial("TransactionForm")
 
     <div>
         <a class="btn btn-default" asp-action="Index">Back</a>
-        <input type="submit" value="Add" class="btn btn-default" />
+        <input type="submit" value="Edit" class="btn btn-default" />
     </div>
 </form>

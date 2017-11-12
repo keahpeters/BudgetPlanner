@@ -20,11 +20,12 @@
         {
             <tr>
                 <td>@transaction.Date.ToLocalTime().ToShortDateString()</td>
-                <td>@transaction.Category</td>
+                <td>@(transaction.Category ?? "To be budgeted")</td>
                 <td>@transaction.Payee</td>
                 <td>@transaction.Memo</td>
                 <td>@(transaction.IsInTransaction ? string.Empty : string.Format("{0:C}", transaction.Amount))</td>
                 <td>@(transaction.IsInTransaction ? string.Format("{0:C}", transaction.Amount) : string.Empty)</td>
+                <td><a class="btn btn-xs btn-default pull-right" asp-action="EditTransaction" asp-route-id="@transaction.Id">Edit</a></td>
             </tr>
         }
     </table>
