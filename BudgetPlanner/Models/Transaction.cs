@@ -10,6 +10,8 @@ namespace BudgetPlanner.Models
 
         public DateTime Date { get; set; }
 
+        public int? CategoryId { get; set; }
+
         public string Category { get; set; }
 
         public decimal Amount { get; set; }

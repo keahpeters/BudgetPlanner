@@ -162,12 +162,19 @@ namespace BudgetPlanner.Repositories
             {
                 dbConnection.Open();
 
-                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                using (IDbTransaction dbTransaction = dbConnection.BeginTransaction())
                 {
-                    await dbConnection.ExecuteAsync(subtractFromBalanceSql, new { amount, userId }, transaction);
-                    await dbConnection.ExecuteAsync(addToCategorySql, new { amount, id }, transaction);
+                    try
+                    {
+                        await dbConnection.ExecuteAsync(subtractFromBalanceSql, new { amount, userId }, dbTransaction);
+                        await dbConnection.ExecuteAsync(addToCategorySql, new { amount, id }, dbTransaction);
 
-                    transaction.Commit();
+                        dbTransaction.Commit();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new RepositoryException("Failed to assign money", ex);
+                    }
                 }
             }
         }
@@ -186,12 +193,19 @@ namespace BudgetPlanner.Repositories
             {
                 dbConnection.Open();
 
-                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                using (IDbTransaction dbTransaction = dbConnection.BeginTransaction())
                 {
-                    await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, transaction);
-                    await dbConnection.ExecuteAsync(addToCategorySql, new { amount, destinationCategoryId }, transaction);
+                    try
+                    {
+                        await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, dbTransaction);
+                        await dbConnection.ExecuteAsync(addToCategorySql, new { amount, destinationCategoryId }, dbTransaction);
 
-                    transaction.Commit();
+                        dbTransaction.Commit();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new RepositoryException("Failed to reassign money", ex);
+                    }
                 }
             }
         }
@@ -210,12 +224,19 @@ namespace BudgetPlanner.Repositories
             {
                 dbConnection.Open();
 
-                using (IDbTransaction transaction = dbConnection.BeginTransaction())
+                using (IDbTransaction dbTransaction = dbConnection.BeginTransaction())
                 {
-                    await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, transaction);
-                    await dbConnection.ExecuteAsync(addToBalanceSql, new { amount, userId }, transaction);
+                    try
+                    {
+                        await dbConnection.ExecuteAsync(subtractFromCategorySql, new { amount, sourceCategoryid }, dbTransaction);
+                        await dbConnection.ExecuteAsync(addToBalanceSql, new { amount, userId }, dbTransaction);
 
-                    transaction.Commit();
+                        dbTransaction.Commit();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new RepositoryException("Failed to unassign money", ex);
+                    }
                 }
             }
         }

@@ -4,8 +4,10 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using BudgetPlanner.Controllers;
+using BudgetPlanner.Infrastructure;
 using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
+using BudgetPlanner.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -21,7 +23,8 @@ namespace BudgetPlanner.Tests.Controllers
         {
             this.userRepository = new Mock<IUserRepository>();
             this.transactionRepository = new Mock<ITransactionRepository>();
-            this.transactionController = new TransactionController(this.userRepository.Object, this.transactionRepository.Object);
+            this.categoryRepository = new Mock<ICategoryRepository>();
+            this.transactionController = new TransactionController(this.userRepository.Object, this.transactionRepository.Object, this.categoryRepository.Object);
             this.SetUpContext(this.transactionController);
 
             this.userRepository.Setup(u => u.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(new ApplicationUser { UserName = "TestUser", Id = Guid.NewGuid() });
@@ -29,6 +32,7 @@ namespace BudgetPlanner.Tests.Controllers
 
         private Mock<IUserRepository> userRepository;
         private Mock<ITransactionRepository> transactionRepository;
+        private Mock<ICategoryRepository> categoryRepository;
         private TransactionController transactionController;
 
         private void SetUpContext(TransactionController controller)
@@ -74,13 +78,88 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public void WhenTransactionRepositoryIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.transactionController = new TransactionController(this.userRepository.Object, null));
+            Assert.Throws<ArgumentNullException>(() => this.transactionController = new TransactionController(this.userRepository.Object, null, this.categoryRepository.Object));
         }
 
         [Test]
         public void WhenUserRepositoryIsNullThenThrowNullArguementException()
         {
-            Assert.Throws<ArgumentNullException>(() => this.transactionController = new TransactionController(this.userRepository.Object, null));
+            Assert.Throws<ArgumentNullException>(() => this.transactionController = new TransactionController(null, this.transactionRepository.Object, this.categoryRepository.Object));
+        }
+
+        [Test]
+        public void WhenCategoryRepositoryIsNullThenThrowNullArguementException()
+        {
+            Assert.Throws<ArgumentNullException>(() => this.transactionController = new TransactionController(this.userRepository.Object, this.transactionRepository.Object, null));
+        }
+
+        [Test]
+        public async Task WhenAddTransactionGetMethodIsCalledThenViewResultIsReturned()
+        {
+            IActionResult result = await this.transactionController.AddTransaction();
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAddTransactionGetMethodIsCalledThenUseDefaultView()
+        {
+            IActionResult result = await this.transactionController.AddTransaction();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddTransactionPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.AddTransaction(new TransactionViewModel());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenAddTransactionPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.AddTransaction(new TransactionViewModel());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenAddTransactionPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.transactionRepository.Setup(t => t.Add(It.IsAny<Transaction>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.transactionController.AddTransaction(new TransactionViewModel());
+
+            Assert.That(this.transactionController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenAddTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.transactionController.AddTransaction(new TransactionViewModel { Amount = 1.00M });
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenAddTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.transactionController.AddTransaction(new TransactionViewModel { Amount = 1.00M });
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
         }
     }
 }
