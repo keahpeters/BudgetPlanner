@@ -15,6 +15,7 @@
             <th>Memo</th>
             <th>Outflow</th>
             <th>Inflow</th>
+            <th></th>
         </tr>
         @foreach (Transaction transaction in Model)
         {
@@ -25,7 +26,10 @@
                 <td>@transaction.Memo</td>
                 <td>@(transaction.IsInTransaction ? string.Empty : string.Format("{0:C}", transaction.Amount))</td>
                 <td>@(transaction.IsInTransaction ? string.Format("{0:C}", transaction.Amount) : string.Empty)</td>
-                <td><a class="btn btn-xs btn-default pull-right" asp-action="EditTransaction" asp-route-id="@transaction.Id">Edit</a></td>
+                <td>
+                    <a class="btn btn-xs btn-danger pull-right" asp-action="DeleteTransaction" asp-route-id="@transaction.Id">Delete</a>
+                    <a class="btn btn-xs btn-default pull-right" asp-action="EditTransaction" asp-route-id="@transaction.Id">Edit</a>
+                </td>
             </tr>
         }
     </table>

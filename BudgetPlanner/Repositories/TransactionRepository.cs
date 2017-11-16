@@ -21,6 +21,8 @@ namespace BudgetPlanner.Repositories
         Task Update(Transaction transaction);
 
         Task UpdateAndReapplyTransaction(Transaction newTransaction, Transaction oldTransaction);
+
+        Task Delete(int id);
     }
 
     public class TransactionRepository : ITransactionRepository
@@ -85,10 +87,7 @@ namespace BudgetPlanner.Repositories
                             },
                             dbTransaction).ConfigureAwait(false);
 
-                        if (transaction.CategoryId == null)
-                            await this.UpdateBalance(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
-                        else
-                            await this.UpdateCategory(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
+                        await this.UpdateBudget(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
 
                         dbTransaction.Commit();
                     }
@@ -120,7 +119,7 @@ namespace BudgetPlanner.Repositories
                 }
                 catch (SqlException ex)
                 {
-                    throw new RepositoryException("Failed to update category", ex);
+                    throw new RepositoryException("Failed to update transaction", ex);
                 }
             }
         }
@@ -153,23 +152,56 @@ namespace BudgetPlanner.Repositories
                             },
                             dbTransaction).ConfigureAwait(false);
 
-                        if (oldTransaction.CategoryId == null)
-                            await this.UndoUpdateBalance(oldTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
-                        else
-                            await this.UndoUpdateCategory(oldTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
-
-                        if (newTransaction.CategoryId == null)
-                            await this.UpdateBalance(newTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
-                        else
-                            await this.UpdateCategory(newTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
+                        await this.UndoTransaction(oldTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
+                        await this.UpdateBudget(newTransaction, dbConnection, dbTransaction).ConfigureAwait(false);
 
                         dbTransaction.Commit();
                     }
                     catch (SqlException ex)
                     {
-                        throw new RepositoryException("Failed to add transaction", ex);
+                        throw new RepositoryException("Failed to update transaction", ex);
                     }
                 }
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            const string sql = "DELETE FROM [Transaction] WHERE Id = @id";
+
+            Transaction transaction = await this.Get(id).ConfigureAwait(false);
+
+            using (IDbConnection dbConnection = this.dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+
+                using (IDbTransaction dbTransaction = dbConnection.BeginTransaction())
+                {
+                    try
+                    {
+                        await this.UndoTransaction(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
+
+                        await dbConnection.ExecuteAsync(sql, new { id }, dbTransaction).ConfigureAwait(false);
+
+                        dbTransaction.Commit();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new RepositoryException("Failed to delete category", ex);
+                    }
+                }
+            }
+        }
+
+        private async Task UpdateBudget(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
+        {
+            if (transaction.CategoryId == null)
+            {
+                await this.UpdateBalance(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
+            }
+            else
+            {
+                await this.UpdateCategory(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
             }
         }
 
@@ -191,7 +223,19 @@ namespace BudgetPlanner.Repositories
             await dbConnection.ExecuteAsync(updateBalanceSql, new { transaction.Amount, transaction.UserId }, dbTransaction);
         }
 
-        private async Task UndoUpdateCategory(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
+        private async Task UndoTransaction(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
+        {
+            if (transaction.CategoryId == null)
+            {
+                await this.UndoTransactionBalance(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
+            }
+            else
+            {
+                await this.UndoTransactionCategory(transaction, dbConnection, dbTransaction).ConfigureAwait(false);
+            }
+        }
+
+        private async Task UndoTransactionCategory(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
         {
             string updateCategorySql = $@"Update Category
                                         SET Budget = Budget {(transaction.IsInTransaction ? "-" : "+")} @Amount
@@ -200,7 +244,7 @@ namespace BudgetPlanner.Repositories
             await dbConnection.ExecuteAsync(updateCategorySql, new { transaction.Amount, transaction.CategoryId }, dbTransaction);
         }
 
-        private async Task UndoUpdateBalance(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
+        private async Task UndoTransactionBalance(Transaction transaction, IDbConnection dbConnection, IDbTransaction dbTransaction)
         {
             string updateBalanceSql = $@"UPDATE ApplicationUser
                                         SET Balance = Balance {(transaction.IsInTransaction ? "-" : "+")} @Amount

@@ -151,5 +151,35 @@ namespace BudgetPlanner.Controllers
             model.Categories = await this.categoryRepository.Get(user.Id);
             return this.View(model);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteTransaction(int id)
+        {
+            Transaction model = await this.transactionRepository.Get(id);
+
+            if (model == null)
+                return this.RedirectToAction("Index");
+
+            return this.View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteTransaction(Transaction model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                try
+                {
+                    await this.transactionRepository.Delete(model.Id);
+                    return this.RedirectToAction("Index");
+                }
+                catch (RepositoryException)
+                {
+                    this.ModelState.AddModelError(string.Empty, "Failed to delete transaction, an unexpected error occured.");
+                }
+            }
+
+            return this.View(model);
+        }
     }
 }

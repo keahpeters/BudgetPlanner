@@ -286,5 +286,86 @@ namespace BudgetPlanner.Tests.Controllers
 
             this.transactionRepository.Verify(t => t.Update(It.IsAny<Transaction>()), Times.Once);
         }
+
+        [Test]
+        public async Task WhenDeleteTransactionGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
+        {
+            this.transactionRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Transaction());
+
+            IActionResult result = await this.transactionController.DeleteTransaction(1);
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionGetMethodIsCalledAndModelExistsThenUseDefaultView()
+        {
+            this.transactionRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Transaction());
+
+            IActionResult result = await this.transactionController.DeleteTransaction(1);
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionGetMethodIsCalledAndModelDoesNotExistsThenRedirectResultIsReturned()
+        {
+            IActionResult result = await this.transactionController.DeleteTransaction(1);
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionPostMethodIsCalledAndModelStateIsInvalidThenUseDefaultView()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.DeleteTransaction(new Transaction());
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionPostMethodIsCalledAndModelStateIsInvalidThenViewResultIsReturned()
+        {
+            this.transactionController.ViewData.ModelState.AddModelError(string.Empty, "Model error");
+
+            IActionResult result = await this.transactionController.DeleteTransaction(new Transaction());
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionPostMethodIsCalledAndAddFailsThenAddModelError()
+        {
+            this.transactionRepository.Setup(c => c.Delete(It.IsAny<int>())).ThrowsAsync(new RepositoryException("Test"));
+
+            await this.transactionController.DeleteTransaction(new Transaction());
+
+            Assert.That(this.transactionController.ViewData.ModelState.ErrorCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToActionResultIsReturned()
+        {
+            IActionResult result = await this.transactionController.DeleteTransaction(new Transaction());
+
+            Assert.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+        }
+
+        [Test]
+        public async Task WhenDeleteTransactionPostMethodIsCalledAndOperationIsSuccessfulThenRedirectToCorrectAction()
+        {
+            IActionResult result = await this.transactionController.DeleteTransaction(new Transaction());
+
+            Assume.That(result, Is.TypeOf(typeof(RedirectToActionResult)));
+
+            Assert.That(((RedirectToActionResult)result).ControllerName, Is.Null);
+            Assert.That(((RedirectToActionResult)result).ActionName, Is.EqualTo("Index"));
+        }
     }
 }
