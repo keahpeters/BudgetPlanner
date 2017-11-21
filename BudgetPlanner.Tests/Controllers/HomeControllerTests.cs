@@ -829,5 +829,41 @@ namespace BudgetPlanner.Tests.Controllers
 
             this.categoryRepository.Verify(c => c.ReassignMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>()));
         }
+
+        [Test]
+        public void WhenErrorGetMethodIsCalledThenViewResultIsReturned()
+        {
+            IActionResult result = this.homeController.Error();
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public void WhenErrorGetMethodIsCalledThenUseDefaultView()
+        {
+            IActionResult result = this.homeController.Error();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
+
+        [Test]
+        public void WhenNotFoundErrorGetMethodIsCalledThenViewResultIsReturned()
+        {
+            IActionResult result = this.homeController.NotFoundError();
+
+            Assert.That(result, Is.TypeOf(typeof(ViewResult)));
+        }
+
+        [Test]
+        public void WhenNotFoundErrorGetMethodIsCalledThenUseDefaultView()
+        {
+            IActionResult result = this.homeController.NotFoundError();
+
+            Assume.That(result, Is.TypeOf(typeof(ViewResult)));
+
+            Assert.That(((ViewResult)result).ViewName, Is.Null);
+        }
     }
 }

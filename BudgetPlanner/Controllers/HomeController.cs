@@ -316,5 +316,17 @@ namespace BudgetPlanner.Controllers
             model.Categories = await this.categoryRepository.Get(user.Id);
             return this.View(model);
         }
+
+        [HttpGet]
+        public IActionResult Error()
+        {
+            return this.View();
+        }
+
+        [HttpGet]
+        public IActionResult NotFoundError()
+        {
+            return this.View();
+        }
     }
 }

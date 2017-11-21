@@ -1,9 +1,9 @@
 ﻿using BudgetPlanner.Identity;
+using BudgetPlanner.Middleware;
 using BudgetPlanner.Models;
 using BudgetPlanner.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -46,13 +46,19 @@ namespace BudgetPlanner
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
+            app.UsePageNotFoundErrorPage();
             app.UseFileServer();
             app.UseNodeModules(env.ContentRootPath);
             app.UseAuthentication();
             app.UseMvc(this.ConfigureRoutes);
-            app.Run(ctx => ctx.Response.WriteAsync("Not found"));
         }
 
         private void ConfigureRoutes(IRouteBuilder routeBuilder)
