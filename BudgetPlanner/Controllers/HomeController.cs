@@ -51,7 +51,7 @@ namespace BudgetPlanner.Controllers
 
                 try
                 {
-                    await this.categoryGroupRepository.Add(categoryGroup);
+                    await this.categoryGroupRepository.AddAsync(categoryGroup);
                     return this.RedirectToAction("Index");
                 }
                 catch (EntityAlreadyExistsException)
@@ -70,7 +70,7 @@ namespace BudgetPlanner.Controllers
         [HttpGet]
         public async Task<IActionResult> EditCategoryGroup(int id)
         {
-            CategoryGroup model = await this.categoryGroupRepository.Get(id);
+            CategoryGroup model = await this.categoryGroupRepository.GetAsync(id);
 
             if (model == null)
                 return this.RedirectToAction("Index");
@@ -85,7 +85,7 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryGroupRepository.Update(categoryGroup);
+                    await this.categoryGroupRepository.UpdateAsync(categoryGroup);
                     return this.RedirectToAction("Index");
                 }
                 catch (EntityAlreadyExistsException)
@@ -104,7 +104,7 @@ namespace BudgetPlanner.Controllers
         [HttpGet]
         public async Task<IActionResult> DeleteCategoryGroup(int id)
         {
-            CategoryGroup model = await this.categoryGroupRepository.Get(id);
+            CategoryGroup model = await this.categoryGroupRepository.GetAsync(id);
 
             if (model == null)
                 return this.RedirectToAction("Index");
@@ -119,7 +119,7 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryGroupRepository.Delete(categoryGroup.Id);
+                    await this.categoryGroupRepository.DeleteAsync(categoryGroup.Id);
                     return this.RedirectToAction("Index");
                 }
                 catch (ChildEntitiesExistException)

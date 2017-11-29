@@ -14,13 +14,13 @@ namespace BudgetPlanner.Repositories
     {
         Task<IEnumerable<CategoryGroup>> GetByUserNameAsync(string userName);
 
-        Task<CategoryGroup> Get(int id);
+        Task<CategoryGroup> GetAsync(int id);
 
-        Task Add(CategoryGroup categoryGroup);
+        Task AddAsync(CategoryGroup categoryGroup);
 
-        Task Update(CategoryGroup categoryGroup);
+        Task UpdateAsync(CategoryGroup categoryGroup);
 
-        Task Delete(int id);
+        Task DeleteAsync(int id);
     }
 
     public class CategoryGroupRepository : ICategoryGroupRepository
@@ -72,7 +72,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task<CategoryGroup> Get(int id)
+        public async Task<CategoryGroup> GetAsync(int id)
         {
             const string sql = "SELECT Id, Name, UserId FROM CategoryGroup WHERE Id = @id";
 
@@ -84,7 +84,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Add(CategoryGroup categoryGroup)
+        public async Task AddAsync(CategoryGroup categoryGroup)
         {
             const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name AND UserId = @UserId";
             const string insertSql = @"INSERT INTO CategoryGroup (UserId, Name)
@@ -115,7 +115,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Update(CategoryGroup categoryGroup)
+        public async Task UpdateAsync(CategoryGroup categoryGroup)
         {
             const string existsSql = "SELECT 1 FROM CategoryGroup WHERE Name = @Name AND UserId = @UserId";
             const string updateSql = @"UPDATE CategoryGroup
@@ -147,7 +147,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Delete(int id)
+        public async Task DeleteAsync(int id)
         {
             const string categoriesExistSql = "SELECT 1 FROM Category WHERE CategoryGroupId = @id";
             const string deleteSql = "DELETE FROM CategoryGroup WHERE Id = @id";
