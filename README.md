@@ -6,7 +6,7 @@ This application is a simple budget planner written in ASP.NET Core. It contains
 
 ### How do I get set up? ###
 
-To set up this project, first you must run the Database script in the DataScripts folder to create the database.
+To set up this project, first you must run the database script in the Database folder to create the database.
 
 ### How do I run the tests? ###
 
