@@ -12,4 +12,4 @@ To set up this project, first you must run the database script in the Database f
 
 The solution contains two NUnit test projects. BudgetPlanner.IntegrationTests contains integration tests to test the data access layer with an in memory database. BudgetPlanner.Tests contains unit tests. 
 
-No setup is required to run the integrations as an in memory SQLite database is used to run the tests against.
+No setup is required to run the integration tests as an in memory SQLite database is used to run the tests against.
