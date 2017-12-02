@@ -150,7 +150,7 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryRepository.Add(category);
+                    await this.categoryRepository.AddAsync(category);
                     return this.RedirectToAction("Index");
                 }
                 catch (EntityAlreadyExistsException)
@@ -169,7 +169,7 @@ namespace BudgetPlanner.Controllers
         [HttpGet]
         public async Task<IActionResult> EditCategory(int id)
         {
-            Category model = await this.categoryRepository.Get(id);
+            Category model = await this.categoryRepository.GetAsync(id);
 
             if (model == null)
                 return this.RedirectToAction("Index");
@@ -184,7 +184,7 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryRepository.Update(category);
+                    await this.categoryRepository.UpdateAsync(category);
                     return this.RedirectToAction("Index");
                 }
                 catch (EntityAlreadyExistsException)
@@ -203,7 +203,7 @@ namespace BudgetPlanner.Controllers
         [HttpGet]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            Category model = await this.categoryRepository.Get(id);
+            Category model = await this.categoryRepository.GetAsync(id);
 
             if (model == null)
                 return this.RedirectToAction("Index");
@@ -221,7 +221,7 @@ namespace BudgetPlanner.Controllers
             {
                 try
                 {
-                    await this.categoryRepository.Delete(category.Id);
+                    await this.categoryRepository.DeleteAsync(category.Id);
                     return this.RedirectToAction("Index");
                 }
                 catch (RepositoryException)
@@ -239,7 +239,7 @@ namespace BudgetPlanner.Controllers
             ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
             var model = new AssignMoneyViewModel
             {
-                Categories = await this.categoryRepository.Get(user.Id)
+                Categories = await this.categoryRepository.GetAsync(user.Id)
             };
 
             return this.View(model);
@@ -258,7 +258,7 @@ namespace BudgetPlanner.Controllers
                 try
                 {
                     if (model.Amount != 0)
-                        await this.categoryRepository.AssignMoney(model.CategoryId, model.Amount, user.Id);
+                        await this.categoryRepository.AssignMoneyAsync(model.CategoryId, model.Amount, user.Id);
 
                     return this.RedirectToAction("Index");
                 }
@@ -268,7 +268,7 @@ namespace BudgetPlanner.Controllers
                 }
             }
 
-            model.Categories = await this.categoryRepository.Get(user.Id);
+            model.Categories = await this.categoryRepository.GetAsync(user.Id);
             return this.View(model);
         }
 
@@ -279,7 +279,7 @@ namespace BudgetPlanner.Controllers
             var model = new ReassignMoneyViewModel
             {
                 SourceCategoryId = sourceCategoryId,
-                Categories = await this.categoryRepository.Get(user.Id)
+                Categories = await this.categoryRepository.GetAsync(user.Id)
             };
 
             return this.View(model);
@@ -300,9 +300,9 @@ namespace BudgetPlanner.Controllers
                     if (model.Amount != 0)
                     {
                         if (model.Unassign)
-                            await this.categoryRepository.UnassignMoney(model.SourceCategoryId, model.Amount, user.Id);
+                            await this.categoryRepository.UnassignMoneyAsync(model.SourceCategoryId, model.Amount, user.Id);
                         else
-                            await this.categoryRepository.ReassignMoney(model.SourceCategoryId, model.DestinationCategoryId, model.Amount);
+                            await this.categoryRepository.ReassignMoneyAsync(model.SourceCategoryId, model.DestinationCategoryId, model.Amount);
                     }
 
                     return this.RedirectToAction("Index");
@@ -313,7 +313,7 @@ namespace BudgetPlanner.Controllers
                 }
             }
 
-            model.Categories = await this.categoryRepository.Get(user.Id);
+            model.Categories = await this.categoryRepository.GetAsync(user.Id);
             return this.View(model);
         }
 

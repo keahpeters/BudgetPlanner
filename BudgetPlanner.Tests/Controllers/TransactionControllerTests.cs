@@ -217,7 +217,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditTransactionPostMethodIsCalledAndAddFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.UpdateAsync(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.transactionController.EditTransaction(new TransactionViewModel());
 

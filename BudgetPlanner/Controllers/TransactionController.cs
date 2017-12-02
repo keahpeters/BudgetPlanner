@@ -39,7 +39,7 @@ namespace BudgetPlanner.Controllers
             ApplicationUser user = await this.userRepository.FindByNameAsync(this.User.Identity.Name);
             var model = new TransactionViewModel
             {
-                Categories = await this.categoryRepository.Get(user.Id),
+                Categories = await this.categoryRepository.GetAsync(user.Id),
                 Date = DateTime.Today
             };
 
@@ -78,7 +78,7 @@ namespace BudgetPlanner.Controllers
                 }
             }
 
-            model.Categories = await this.categoryRepository.Get(user.Id);
+            model.Categories = await this.categoryRepository.GetAsync(user.Id);
             return this.View(model);
         }
 
@@ -93,7 +93,7 @@ namespace BudgetPlanner.Controllers
 
             var model = new TransactionViewModel
             {
-                Categories = await this.categoryRepository.Get(user.Id),
+                Categories = await this.categoryRepository.GetAsync(user.Id),
                 Id = transaction.Id,
                 UserId = transaction.UserId,
                 CategoryId = transaction.CategoryId,
@@ -148,7 +148,7 @@ namespace BudgetPlanner.Controllers
                 }
             }
 
-            model.Categories = await this.categoryRepository.Get(user.Id);
+            model.Categories = await this.categoryRepository.GetAsync(user.Id);
             return this.View(model);
         }
 

@@ -12,5 +12,9 @@ namespace BudgetPlanner.IntegrationTests.DatabaseModels
 
         [Required]
         public int CategoryGroupId { get; set; }
+
+        [Required]
+        [Default(typeof(decimal), "0.00")]
+        public decimal Budget { get; set; }
     }
 }

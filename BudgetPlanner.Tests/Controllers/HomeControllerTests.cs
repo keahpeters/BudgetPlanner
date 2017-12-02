@@ -414,7 +414,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenAddCategoryPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Add(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+            this.categoryRepository.Setup(c => c.AddAsync(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
 
             await this.homeController.AddCategory(new Category());
 
@@ -424,7 +424,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenAddCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Add(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.AddAsync(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.homeController.AddCategory(new Category());
 
@@ -453,7 +453,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<int>())).ReturnsAsync(new Category());
 
             IActionResult result = await this.homeController.EditCategory(1);
 
@@ -463,7 +463,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryGetMethodIsCalledAndModelExistsThenUseDefaultView()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<int>())).ReturnsAsync(new Category());
 
             IActionResult result = await this.homeController.EditCategory(1);
 
@@ -505,7 +505,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryPostMethodIsCalledAndCategoryGroupAlreadyExistsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
+            this.categoryRepository.Setup(c => c.UpdateAsync(It.IsAny<Category>())).ThrowsAsync(new EntityAlreadyExistsException("Test"));
 
             await this.homeController.EditCategory(new Category());
 
@@ -515,7 +515,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenEditCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Update(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.UpdateAsync(It.IsAny<Category>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.homeController.EditCategory(new Category());
 
@@ -544,7 +544,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenDeleteCategoryGetMethodIsCalledAndModelExistsThenViewResultIsReturned()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<int>())).ReturnsAsync(new Category());
 
             IActionResult result = await this.homeController.DeleteCategory(1);
 
@@ -554,7 +554,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenDeleteCategoryGetMethodIsCalledAndModelExistsThenUseDefaultView()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<int>())).ReturnsAsync(new Category());
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<int>())).ReturnsAsync(new Category());
 
             IActionResult result = await this.homeController.DeleteCategory(1);
 
@@ -596,7 +596,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenDeleteCategoryPostMethodIsCalledAndAddFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.Delete(It.IsAny<int>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.DeleteAsync(It.IsAny<int>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.homeController.DeleteCategory(new Category());
 
@@ -651,7 +651,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenAssignMoneyGetMethodIsCalledThenCategoriesAreSetOnModel()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<Guid>())).ReturnsAsync(
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<Guid>())).ReturnsAsync(
                 new List<Category> { new Category(), new Category() });
 
             IActionResult result = await this.homeController.AssignMoney();
@@ -688,7 +688,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenAssignMoneyPostMethodIsCalledAndOperationFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.AssignMoney(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.AssignMoneyAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.homeController.AssignMoney(new AssignMoneyViewModel { Amount = 1.00M});
 
@@ -743,7 +743,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenReassignMoneyGetMethodIsCalledThenCategoriesAreSetOnModel()
         {
-            this.categoryRepository.Setup(c => c.Get(It.IsAny<Guid>())).ReturnsAsync(
+            this.categoryRepository.Setup(c => c.GetAsync(It.IsAny<Guid>())).ReturnsAsync(
                 new List<Category> { new Category(), new Category() });
 
             IActionResult result = await this.homeController.ReassignMoney(1);
@@ -780,7 +780,7 @@ namespace BudgetPlanner.Tests.Controllers
         [Test]
         public async Task WhenReassignMoneyPostMethodIsCalledAndOperationFailsThenAddModelError()
         {
-            this.categoryRepository.Setup(c => c.ReassignMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>())).ThrowsAsync(new RepositoryException("Test"));
+            this.categoryRepository.Setup(c => c.ReassignMoneyAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>())).ThrowsAsync(new RepositoryException("Test"));
 
             await this.homeController.ReassignMoney(new ReassignMoneyViewModel { Amount = 1.00M, Unassign = false});
 
@@ -819,7 +819,7 @@ namespace BudgetPlanner.Tests.Controllers
         {
             await this.homeController.ReassignMoney(new ReassignMoneyViewModel() { Amount = 1.00M, Unassign = true });
 
-            this.categoryRepository.Verify(c => c.UnassignMoney(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>()));
+            this.categoryRepository.Verify(c => c.UnassignMoneyAsync(It.IsAny<int>(), It.IsAny<decimal>(), It.IsAny<Guid>()));
         }
 
         [Test]
@@ -827,7 +827,7 @@ namespace BudgetPlanner.Tests.Controllers
         {
             await this.homeController.ReassignMoney(new ReassignMoneyViewModel() { Amount = 1.00M, Unassign = false });
 
-            this.categoryRepository.Verify(c => c.ReassignMoney(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>()));
+            this.categoryRepository.Verify(c => c.ReassignMoneyAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<decimal>()));
         }
 
         [Test]

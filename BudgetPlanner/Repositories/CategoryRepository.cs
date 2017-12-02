@@ -12,21 +12,21 @@ namespace BudgetPlanner.Repositories
 {
     public interface ICategoryRepository
     {
-        Task<Category> Get(int id);
+        Task<Category> GetAsync(int id);
 
-        Task<IEnumerable<Category>> Get(Guid userId);
+        Task<IEnumerable<Category>> GetAsync(Guid userId);
 
-        Task Add(Category category);
+        Task AddAsync(Category category);
 
-        Task Update(Category category);
+        Task UpdateAsync(Category category);
 
-        Task Delete(int id);
+        Task DeleteAsync(int id);
 
-        Task AssignMoney(int id, decimal amount, Guid userId);
+        Task AssignMoneyAsync(int id, decimal amount, Guid userId);
 
-        Task ReassignMoney(int sourceCategoryid, int destinationCategoryId, decimal amount);
+        Task ReassignMoneyAsync(int sourceCategoryid, int destinationCategoryId, decimal amount);
 
-        Task UnassignMoney(int sourceCategoryid, decimal amount, Guid userId);
+        Task UnassignMoneyAsync(int sourceCategoryid, decimal amount, Guid userId);
     }
 
     public class CategoryRepository : ICategoryRepository
@@ -38,7 +38,7 @@ namespace BudgetPlanner.Repositories
             this.dbConnectionFactory = dbConnectionFactory ?? throw new ArgumentNullException(nameof(dbConnectionFactory));
         }
 
-        public async Task<Category> Get(int id)
+        public async Task<Category> GetAsync(int id)
         {
             const string sql = "SELECT Id, Name, CategoryGroupId, Budget FROM Category WHERE Id = @id";
 
@@ -50,7 +50,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task<IEnumerable<Category>> Get(Guid userId)
+        public async Task<IEnumerable<Category>> GetAsync(Guid userId)
         {
             const string sql = @"SELECT c.Id, c.Name, CategoryGroupId, cg.Name AS CategoryGroup, Budget 
                                 FROM Category c INNER JOIN CategoryGroup cg ON c.CategoryGroupId = cg.Id
@@ -63,7 +63,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Add(Category category)
+        public async Task AddAsync(Category category)
         {
             const string existsSql = "SELECT 1 FROM Category WHERE Name = @Name AND CategoryGroupId = @CategoryGroupId";
             const string insertSql = @"INSERT INTO Category (Name, CategoryGroupId)
@@ -94,7 +94,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Update(Category category)
+        public async Task UpdateAsync(Category category)
         {
             const string existsSql = "SELECT 1 FROM Category WHERE Name = @Name AND CategoryGroupId = @CategoryGroupId";
             const string updateSql = @"UPDATE Category
@@ -126,9 +126,9 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            Category category = await this.Get(id);
+            Category category = await this.GetAsync(id);
 
             if (category.Budget != 0)
                 throw new RepositoryException("Category can not be deleted when budget is not 0.00");
@@ -148,7 +148,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task AssignMoney(int id, decimal amount, Guid userId)
+        public async Task AssignMoneyAsync(int id, decimal amount, Guid userId)
         {
             const string subtractFromBalanceSql = @"UPDATE ApplicationUser
                                                     SET Balance = Balance - @amount
@@ -179,7 +179,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task ReassignMoney(int sourceCategoryid, int destinationCategoryId, decimal amount)
+        public async Task ReassignMoneyAsync(int sourceCategoryid, int destinationCategoryId, decimal amount)
         {
             const string subtractFromCategorySql = @"UPDATE Category
                                         SET Budget = Budget - @amount
@@ -210,7 +210,7 @@ namespace BudgetPlanner.Repositories
             }
         }
 
-        public async Task UnassignMoney(int sourceCategoryid, decimal amount, Guid userId)
+        public async Task UnassignMoneyAsync(int sourceCategoryid, decimal amount, Guid userId)
         {
             const string subtractFromCategorySql = @"UPDATE Category
                                         SET Budget = Budget - @amount
